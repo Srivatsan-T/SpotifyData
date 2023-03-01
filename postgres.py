@@ -7,4 +7,4 @@ def postgres_init(db = 'postgres',user = 'postgres',pw = 'admin',host = 'localho
     return conn
 
 def create_liked_songs_table():
-    
+    pass
