@@ -30,7 +30,7 @@ def check_liked_songs():
     res = cursor.fetchone()
     cursor.close()
     conn.close()
-    if res:
+    if res[0] is not None:
         return res[0],True
     return None,False
 
