@@ -1,9 +1,7 @@
 import spotipy
 import pandas as pd
-import requests
 import os
 from dotenv import load_dotenv
-import json
 
 
 load_dotenv()
@@ -44,7 +42,7 @@ def get_liked_songs(token):
     lim = 50
     off =  0
     songs = []
-    next = 'not null'
+    next = 'not none'
     while next is not None:
         liked_songs = sp.current_user_saved_tracks(offset=off,limit=lim)
         number_of_songs = len(liked_songs['items'])
