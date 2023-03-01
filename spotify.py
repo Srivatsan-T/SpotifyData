@@ -37,6 +37,7 @@ def recent_songs(token):
         songs.append(temp_dict)
     return songs
 
+
 def get_liked_songs(token):
     sp = spotipy.Spotify(token)
     lim = 50

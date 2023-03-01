@@ -22,6 +22,17 @@ def create_recent_songs_table():
     cursor.close()
     conn.close()
 
+def check_liked_songs():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute('SELECT MAX(added_at) from liked_songs')
+    conn.commit()
+    res = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if res:
+        return res[0],True
+    return None,False
 
 def add_liked_songs_dict(songs):
     conn = postgres_init()
@@ -39,10 +50,10 @@ def add_liked_songs_dict(songs):
         values = [[value for value in song.values()] for song in songs]
 
         execute_values(cursor, query, values)
-        
         conn.commit()
-        cursor.close()
-        conn.close()
+
+    cursor.close()
+    conn.close()
 
 
 '''
