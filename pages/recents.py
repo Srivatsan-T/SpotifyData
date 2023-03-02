@@ -17,14 +17,22 @@ def layout(username = None):
     songs = recent_songs(token)
     df = pd.DataFrame.from_dict(songs)
 
-    return dbc.Table([
-        html.Thead(
-            html.Tr([html.Th(col) for col in df.columns])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(df.iloc[i][col]) for col in df.columns
-            ]) for i in range(len(df))
-        ])
-    ])
+    return html.Div([
+
+            html.Div(id='left_tab', children=[
+            dbc.Button("Liked Songs", className='me-2',
+                       color='primary', href=f'/liked/{username}'),
+            html.Br(),
+            dbc.Button("Recently Played Songs", className='me-2', color='success',
+                       href=f'/recents/{username}', style={'margin-top': '25px'}),
+            html.Br(),
+            dbc.Button("Analytics", color='danger', className='me-2',
+                       href=f'/analytics/{username}', style={'margin-top': '25px'}),
+            html.Br(),
+            dbc.Button("Back", href=f'/tools/{username}', className='me-2',style={'margin-top': '25px'},color='info')
+        ], style={'padding-top': '25px', "padding-left": "25px"}),
+
+        html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
+                 hover=True, index=True)]) 
+    ],style={'display': 'flex', 'flex-direction': 'row'})
 

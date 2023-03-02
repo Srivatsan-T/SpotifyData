@@ -11,12 +11,13 @@ def layout():
         dcc.Location(id='url', refresh=True),
         html.Div(id = 'main_content',children=[
             html.Label('Spotify UserName'),
-            dbc.Input(type = "text",id = 'username_input'),
+            html.Br(),
+            dbc.Input(type = "text",id = 'username_input',style={'margin-top':'15px'}),
             html.Br(),
             dbc.Button("Submit",id = 'username_submit_button',color = 'primary',className='me-2'),
             html.Br(),
-            html.Label("Initial Text",id = 'target_label')
-        ])
+            html.Label("Initial Text",id = 'target_label',style={'margin-top':"15px"})
+        ],style={'padding-top':'25px',"padding-left":"25px"})
     ])
 
 @callback(
@@ -29,4 +30,4 @@ def button_on_clicked(n_clicks,value):
     if value == None:
         return '','/'
     else:
-        return "Loading...",'/liked/{}'.format(value)
+        return "Loading...",'/tools/{}'.format(value)
