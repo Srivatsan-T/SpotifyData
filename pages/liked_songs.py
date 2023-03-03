@@ -9,20 +9,15 @@ import spotify
 from datetime import datetime
 
 
-import postgres
-
 load_dotenv()
 dash.register_page(__name__, path_template='/liked/<username>')
-
-
-
 
 
 def layout(username=None):
 
 
 
-
+    return html.Div([])
 
     return html.Div([
             html.Div(id='left_tab', children=[

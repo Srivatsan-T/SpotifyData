@@ -22,13 +22,17 @@ def create_recent_songs_table():
     cursor.close()
     conn.close()
 
-def create_songs_table():
+#Creates an album table and returns it's results
+def create_album_table():
     conn = postgres_init()
     cursor = conn.cursor()
-    cursor.execute(open('sql/create_songs.sql').read())
+    cursor.execute(open('sql/create_album_table.sql').read())
+    cursor.execute(open('sql/select_all_albums.sql').read())
     conn.commit()
+    res = cursor.fetchall()
     cursor.close()
     conn.close()
+    return res
 
 def check_liked_songs():
     conn = postgres_init()
@@ -58,6 +62,43 @@ def add_liked_songs_dict(songs):
         execute_values(cursor, query, values)
         conn.commit()
 
+    cursor.close()
+    conn.close()
+
+def add_albums_dict(albums):
+    conn = postgres_init()
+    cursor = conn.cursor()
+
+    if albums:
+        for i in range(len(albums)):
+            album_name = albums[i]['album_name']
+            album_name = album_name.replace("'","''")
+
+        columns = albums[0].keys()
+        query = "INSERT INTO album ({}) VALUES %s".format(','.join(columns))
+        values = [[value for value in album.values()] for album in albums]
+
+        execute_values(cursor, query, values)
+        conn.commit()
+
+    cursor.close()
+    conn.close()    
+
+def select_unique_albums():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/select_unique_album_ids.sql').read())
+    conn.commit()
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
+def select_liked_songs():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/view_liked_songs.sql').read())
+    conn.commit()
     cursor.close()
     conn.close()
 

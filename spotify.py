@@ -51,6 +51,19 @@ def get_liked_songs(token):
         next = liked_songs['next']
     return songs
 
+def get_albums(token,album_ids):
+    sp = spotipy.Spotify(token)
+    albums = []
+    number_of_ids = len(album_ids)
+    #print(number_of_ids)
+    if album_ids:
+        #print(sp.albums(album_ids[0:2]))
+        for i in range(int(number_of_ids/20)):
+            albums.extend(sp.albums(album_ids[20*i:20*i+20])['albums'])
+        albums.extend(sp.albums(album_ids[int(number_of_ids/20)*20:])['albums'])
+
+    return albums
+
 def process_liked_songs(liked_songs):
     number_of_songs = len(liked_songs)
     songs_dict = []
@@ -70,21 +83,22 @@ def process_liked_songs(liked_songs):
 
     return songs_dict
 
-def process_albums(liked_songs):
-    number_of_songs = len(liked_songs)
+def process_albums(albums):
+    number_of_songs = len(albums)
     album_dict = []
     for i in range(number_of_songs):
         temp_dict = {}
-        temp_dict['album_id'] = liked_songs[i]['album']['id']
-        temp_dict['album_name'] = liked_songs[i]['album']['name']
-        temp_dict['popularity'] = liked_songs[i]['album']['popularity']
-        temp_dict['followers'] = liked_songs[i]['artists']['followers']['total']
+        temp_dict['album_id'] = albums[i]['id']
+        temp_dict['album_name'] = albums[i]['name']
+        temp_dict['popularity'] = albums[i]['popularity']
 
-        for genre in liked_songs[i]['album']['genres']:
+        for genre in albums[i]['genres']:
             temp_dict['genres'] = genre
             album_dict.append(temp_dict.copy())
-        for artist in liked_songs[i]['album']['artists']:
-            temp_dict['artists'] = artist
+        if not albums[i]['genres']:
+            temp_dict['genres'] = 'N.A'
+        for artist in albums[i]['artists']:
+            temp_dict['artists'] = artist['id']
             album_dict.append(temp_dict.copy())
 
     return album_dict
