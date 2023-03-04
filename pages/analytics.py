@@ -2,20 +2,12 @@ from dash import dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input,Output,State
 from dash import html
-from dotenv import load_dotenv
 import dash
 import pandas as pd
-import spotify
 
-
-load_dotenv()
-dash.register_page(__name__,path_template='/recents/<username>')
+dash.register_page(__name__,path_template='/analytics/<username>')
 
 def layout(username = None):
-
-    token = spotify.spotify_init(username)
-    songs = spotify.recent_songs(token)
-    df = pd.DataFrame.from_dict(songs)
 
     return html.Div([
 
@@ -31,8 +23,5 @@ def layout(username = None):
             html.Br(),
             dbc.Button("Back", href=f'/tools/{username}', className='me-2',style={'margin-top': '25px'},color='info')
         ], style={'padding-top': '25px', "padding-left": "25px"}),
-
-        html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
-                 hover=True, index=True)]) 
+        html.Div([])
     ],style={'display': 'flex', 'flex-direction': 'row'})
-

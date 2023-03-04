@@ -1,12 +1,10 @@
-from dash import dcc
+from dash import dcc,callback
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash import html
 from dotenv import load_dotenv
 import dash
 import pandas as pd
-import spotify
-from datetime import datetime
 import postgres
 
 load_dotenv()
@@ -17,8 +15,10 @@ def layout(username=None):
 
 
     liked_songs = postgres.select_liked_songs() 
-    column_names = ['song_name','popularity','preview_url']
+
+    column_names = ['song_id','song_name','album_name','artists','popularity','preview_url']
     df = pd.DataFrame(liked_songs,columns=column_names)
+    df = df.drop(['song_id','preview_url'],axis=1)
     return html.Div([
             html.Div(id='left_tab', children=[
             dbc.Button("Liked Songs", className='me-2',
@@ -34,5 +34,5 @@ def layout(username=None):
         ], style={'padding-top': '25px', "padding-left": "25px"}),
 
         html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
-                 hover=True, index=True)]) 
+                 hover=True, index=True)],id='table') 
     ],style={'display': 'flex', 'flex-direction': 'row'})
