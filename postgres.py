@@ -136,6 +136,8 @@ def select_liked_songs():
     cursor = conn.cursor()
     cursor.execute(open('sql/view_liked_songs.sql').read())
     conn.commit()
+    res = cursor.fetchall()
     cursor.close()
     conn.close()
+    return res
 

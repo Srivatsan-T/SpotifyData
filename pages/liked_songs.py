@@ -7,7 +7,7 @@ import dash
 import pandas as pd
 import spotify
 from datetime import datetime
-
+import postgres
 
 load_dotenv()
 dash.register_page(__name__, path_template='/liked/<username>')
@@ -16,9 +16,9 @@ dash.register_page(__name__, path_template='/liked/<username>')
 def layout(username=None):
 
 
-
-    return html.Div([])
-
+    liked_songs = postgres.select_liked_songs() 
+    column_names = ['song_name','popularity','preview_url']
+    df = pd.DataFrame(liked_songs,columns=column_names)
     return html.Div([
             html.Div(id='left_tab', children=[
             dbc.Button("Liked Songs", className='me-2',
@@ -33,6 +33,6 @@ def layout(username=None):
             dbc.Button("Back", href=f'/tools/{username}', className='me-2',style={'margin-top': '25px'},color = 'info')
         ], style={'padding-top': '25px', "padding-left": "25px"}),
 
-        html.Div([dbc.Table.from_dataframe(df_display, dark=True, striped=True, bordered=True,
+        html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
                  hover=True, index=True)]) 
     ],style={'display': 'flex', 'flex-direction': 'row'})

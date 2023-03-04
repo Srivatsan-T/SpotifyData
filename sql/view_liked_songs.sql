@@ -1,0 +1,1 @@
+SELECT song_name,popularity,preview_url from liked_songs

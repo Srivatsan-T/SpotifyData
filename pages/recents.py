@@ -5,7 +5,7 @@ from dash import html
 from dotenv import load_dotenv
 import dash
 import pandas as pd
-from spotify import recent_songs,spotify_init,get_liked_songs
+from spotify import recent_songs,spotify_init
 
 
 load_dotenv()
