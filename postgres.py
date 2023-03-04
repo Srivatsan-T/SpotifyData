@@ -34,6 +34,24 @@ def create_album_table():
     conn.close()
     return res
 
+def create_artist_table():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/create_artist_table.sql').read())
+    conn.commit()
+    cursor.close()
+    conn.close()    
+
+def select_unique_artists():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/select_unique_artist_ids.sql').read())
+    conn.commit()
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
 def check_liked_songs():
     conn = postgres_init()
     cursor = conn.cursor()
@@ -83,6 +101,25 @@ def add_albums_dict(albums):
 
     cursor.close()
     conn.close()    
+
+def add_artists_dict(artists):
+    conn = postgres_init()
+    cursor = conn.cursor()
+
+    if artists:
+        for i in range(len(artists)):
+            artist_name = artists[i]['artist_name']
+            artist_name = artist_name.replace("'","''")
+
+        columns = artists[0].keys()
+        query = "INSERT INTO artist ({}) VALUES %s".format(','.join(columns))
+        values = [[value for value in artist.values()] for artist in artists]
+
+        execute_values(cursor, query, values)
+        conn.commit()
+
+    cursor.close()
+    conn.close()        
 
 def select_unique_albums():
     conn = postgres_init()

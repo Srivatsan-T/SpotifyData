@@ -64,6 +64,19 @@ def get_albums(token,album_ids):
 
     return albums
 
+def get_artists(token,artist_ids):
+    sp = spotipy.Spotify(token)
+    artists = []
+    number_of_ids = len(artist_ids)
+    if artist_ids:
+        #print(sp.albums(album_ids[0:2]))
+        for i in range(int(number_of_ids/50)):
+            artists.extend(sp.artists(artist_ids[50*i:50*i+50])['artists'])
+        artists.extend(sp.artists(artist_ids[int(number_of_ids/50)*50:])['artists'])
+
+    return artists
+
+
 def process_liked_songs(liked_songs):
     number_of_songs = len(liked_songs)
     songs_dict = []
@@ -102,3 +115,21 @@ def process_albums(albums):
             album_dict.append(temp_dict.copy())
 
     return album_dict
+
+def process_artists(artists):
+    number_of_songs = len(artists)
+    artist_dict = []
+    for i in range(number_of_songs):
+        temp_dict = {}
+        temp_dict['artist_id'] = artists[i]['id']
+        temp_dict['artist_name'] = artists[i]['name']
+        temp_dict['popularity'] = artists[i]['popularity']
+        temp_dict['followers'] = artists[i]['popularity']
+
+        for genre in artists[i]['genres']:
+            temp_dict['genres'] = genre
+            artist_dict.append(temp_dict.copy())
+        if not artists[i]['genres']:
+            temp_dict['genres'] = 'N.A'
+
+    return artist_dict

@@ -1,0 +1,1 @@
+SELECT DISTINCT artist_id from artist

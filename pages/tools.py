@@ -31,7 +31,27 @@ def layout(username = None):
     postgres.add_liked_songs_dict(songs_dict)
 
     #Artists processed
+    artist_ids_spotify = []
+
+    for i in songs_dict:
+        artist_ids_spotify.append(i['artists'])
+    artist_ids_spotify = list(set(artist_ids_spotify))
+    artists = spotify.get_artists(token,artist_ids_spotify)
+
+    postgres.create_artist_table()
+    artist_ids_tuple = postgres.select_unique_artists()
+    artist_ids = []
+    for i in artist_ids_tuple:
+        artist_ids.append(i[0])
     
+    new_artists = []
+    for artist in artists:
+        if artist['id'] not in artist_ids:
+            new_artists.append(artist)
+
+    artists = new_artists.copy()
+    artists = spotify.process_artists(artists)
+    postgres.add_artists_dict(artists) 
     
     #Albums processed
     album_ids_spotify = []
