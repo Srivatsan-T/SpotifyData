@@ -27,6 +27,9 @@ def spotify_init(spotify_username):
 def recent_songs(token):
     sp = spotipy.Spotify(token)
     user_recent = sp.current_user_recently_played(limit = 50)
+    for i in user_recent['items']:
+        i['added_at'] = i['played_at']
+    '''
     number_of_songs = len(user_recent['items'])
     songs = []
     for i in range(number_of_songs):
@@ -36,6 +39,8 @@ def recent_songs(token):
         temp_dict['played_at'] = user_recent['items'][i]['played_at']
         songs.append(temp_dict)
     return songs
+    '''
+    return user_recent['items']
 
 def get_liked_songs(token):
     sp = spotipy.Spotify(token)
@@ -95,6 +100,7 @@ def process_liked_songs(liked_songs):
             songs_dict.append(temp_dict.copy())
 
     return songs_dict
+
 
 def process_albums(albums):
     number_of_songs = len(albums)

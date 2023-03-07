@@ -12,7 +12,7 @@ load_dotenv()
 dash.register_page(__name__,path_template='/recents/<username>')
 
 def layout(username = None):
-
+    '''
     token = spotify.spotify_init(username)
     songs = spotify.recent_songs(token)
     df = pd.DataFrame.from_dict(songs)
@@ -35,4 +35,4 @@ def layout(username = None):
         html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
                  hover=True, index=True)]) 
     ],style={'display': 'flex', 'flex-direction': 'row'})
-
+    '''

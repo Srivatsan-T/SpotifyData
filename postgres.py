@@ -52,10 +52,10 @@ def select_unique_artists():
     conn.close()
     return res
 
-def check_liked_songs():
+def check_liked_songs(table):
     conn = postgres_init()
     cursor = conn.cursor()
-    cursor.execute('SELECT MAX(added_at) from liked_songs')
+    cursor.execute('SELECT MAX(added_at) from {}'.format(table))
     conn.commit()
     res = cursor.fetchone()
     cursor.close()
@@ -64,7 +64,7 @@ def check_liked_songs():
         return res[0],True
     return None,False
 
-def add_liked_songs_dict(songs):
+def add_liked_songs_dict(songs,table):
     conn = postgres_init()
     cursor = conn.cursor()
 
@@ -74,9 +74,8 @@ def add_liked_songs_dict(songs):
             song_name = song_name.replace("'","''")
 
         columns = songs[0].keys()
-        query = "INSERT INTO liked_songs ({}) VALUES %s".format(','.join(columns))
+        query = "INSERT INTO {} ({}) VALUES %s".format(table,','.join(columns))
         values = [[value for value in song.values()] for song in songs]
-
         execute_values(cursor, query, values)
         conn.commit()
 

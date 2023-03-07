@@ -36,13 +36,27 @@ def fetch_data(username):
     df = pd.DataFrame.from_dict(songs_dict)
     postgres.create_liked_songs_table()
 
-    res, flag = postgres.check_liked_songs()
+    res, flag = postgres.check_liked_songs('liked_songs')
     if flag:
         df['added_at'] = df['added_at'].apply(check_date)
         df = df[df['added_at'] > res]
 
     songs_dict= list(df.T.to_dict().values())
-    postgres.add_liked_songs_dict(songs_dict)
+    postgres.add_liked_songs_dict(songs_dict,'liked_songs')
+
+   
+    #Recents Processed
+    recent_songs = spotify.recent_songs(token)
+    recent_songs_dict = spotify.process_liked_songs(recent_songs)
+    recent_df = pd.DataFrame.from_dict(recent_songs_dict)
+    postgres.create_recent_songs_table()
+    res,flag = postgres.check_liked_songs('recents')
+    if flag:
+        recent_df['added_at'] = recent_df['added_at'].apply(check_date)
+        recent_df = recent_df[recent_df['added_at'] > res]
+    
+    recent_songs_dict = list(recent_df.T.to_dict().values())
+    postgres.add_liked_songs_dict(recent_songs_dict,'recents')
 
     #Artists processed
     artist_ids_spotify = []
