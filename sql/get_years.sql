@@ -1,0 +1,1 @@
+SELECT distinct EXTRACT('year' from added_at) as years from liked_songs order by years

@@ -141,3 +141,38 @@ def select_liked_songs():
     conn.close()
     return res
 
+#Analytics aid functions
+
+def get_years():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/get_years.sql').read())
+    conn.commit()
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
+def get_albums_for_year(year):
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/get_albums.sql').read().format(year))
+    conn.commit()
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
+
+def get_popular_for_year(year,flag):
+    conn = postgres_init()
+    cursor = conn.cursor()
+    final_res = []
+    for month in range(1,13):
+        query = open('sql/get_popular.sql').read()
+        cursor.execute(query.format(year,month,flag))
+        conn.commit()
+        res = cursor.fetchall()
+        final_res.extend(res)
+    cursor.close()
+    conn.close()
+    return final_res

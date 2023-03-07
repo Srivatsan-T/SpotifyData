@@ -18,6 +18,6 @@ def layout(username = None):
             dbc.Button("Analytics",color = 'danger',className='me-2',href = f'/analytics/{username}',style={'margin-top' : '25px'}),
             html.Br(),
             dbc.Button("Back", href='/', className='me-2',style={'margin-top': '25px'},color = 'info')
-        ],style={'padding-top':'25px',"padding-left":"25px"}),
-        html.Div([html.Label("Select the feature to use")],style={"padding-left":"25px","padding-top":'90px'})
+        ],style={'padding-top':'25px',"padding-left":"25px",'outline-style':'solid'}),
+        html.Div([html.Label("Select the feature to use")],style={"padding-left":"25px","padding-top":'90px','outline-style':'solid'})
     ],style={'display': 'flex', 'flex-direction': 'row'})    

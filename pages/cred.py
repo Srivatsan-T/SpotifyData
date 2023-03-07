@@ -34,7 +34,6 @@ def fetch_data(username):
     songs = spotify.get_liked_songs(token)
     songs_dict = spotify.process_liked_songs(songs)
     df = pd.DataFrame.from_dict(songs_dict)
-    df_display = df.copy()
     postgres.create_liked_songs_table()
 
     res, flag = postgres.check_liked_songs()
