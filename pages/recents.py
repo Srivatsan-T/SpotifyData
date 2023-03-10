@@ -5,17 +5,18 @@ from dash import html
 from dotenv import load_dotenv
 import dash
 import pandas as pd
-import spotify
-
+import postgres
 
 load_dotenv()
 dash.register_page(__name__,path_template='/recents/<username>')
 
 def layout(username = None):
-    '''
-    token = spotify.spotify_init(username)
-    songs = spotify.recent_songs(token)
-    df = pd.DataFrame.from_dict(songs)
+
+    recents = postgres.select_recent_songs()
+    column_names = ['song_id','song_name','album_name','artists','popularity','preview_url']
+    df = pd.DataFrame(recents,columns=column_names)
+    df = df.drop(['song_id','preview_url'],axis=1)
+
 
     return html.Div([
 
@@ -35,4 +36,3 @@ def layout(username = None):
         html.Div([dbc.Table.from_dataframe(df, dark=True, striped=True, bordered=True,
                  hover=True, index=True)]) 
     ],style={'display': 'flex', 'flex-direction': 'row'})
-    '''

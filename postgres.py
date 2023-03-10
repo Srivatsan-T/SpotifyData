@@ -140,6 +140,15 @@ def select_liked_songs():
     conn.close()
     return res
 
+def select_recent_songs():
+    conn = postgres_init()
+    cursor = conn.cursor()
+    cursor.execute(open('sql/view_recents.sql').read())
+    conn.commit()
+    res = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return res
 #Analytics aid functions
 
 def get_years():

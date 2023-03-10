@@ -1,5 +1,5 @@
 import dash
-from dash import html,dcc
+from dash import html,callback,Output,Input
 import dash_bootstrap_components as dbc
 
 
@@ -9,15 +9,25 @@ dash.register_page(__name__,path_template='/tools/<username>')
 
 def layout(username = None):
 
-    return html.Div([
-        html.Div(id = 'left_tab',children=[
-            dbc.Button("Liked Songs",className='me-2',color='primary',href = f'/liked/{username}'),
-            html.Br(),
-            dbc.Button("Recently Played Songs",className='me-2',color='success',href = f'/recents/{username}',style={'margin-top' : '25px'}),
-            html.Br(),
-            dbc.Button("Analytics",color = 'danger',className='me-2',href = f'/analytics/{username}',style={'margin-top' : '25px'}),
-            html.Br(),
-            dbc.Button("Back", href='/', className='me-2',style={'margin-top': '25px'},color = 'info')
-        ],style={'padding-top':'25px',"padding-left":"25px",'outline-style':'solid'}),
-        html.Div([html.Label("Select the feature to use")],style={"padding-left":"25px","padding-top":'90px','outline-style':'solid'})
-    ],style={'display': 'flex', 'flex-direction': 'row'})    
+    navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Liked Songs", href='#',id='LikedSongs')),
+        dbc.NavItem(dbc.NavLink("Recents", href="#",id="Recents")),
+        dbc.NavItem(dbc.NavLink("Analytics", href="#",id="Analytics")),
+        dbc.NavItem(dbc.NavLink("Back", href="#",id="Back"))
+    ],
+    brand="Spotify Analyzer",
+    brand_href="#",
+    #style={'margin-bottom': '50px','background-image':'url("https://i.pinimg.com/736x/5d/73/ea/5d73eaabb25e3805de1f8cdea7df4a42--tumblr-backgrounds-iphone-phone-wallpapers-iphone-wallaper-tumblr.jpg")','background-color':'#3b5998'},
+    id='NaviBar',
+    className='box-form left'
+    )
+
+    first_name = str(username).split('%20')[0]
+
+    return html.Div([navbar,
+        html.Div([html.H1("Hello",style={'font-size':'10vmax','color':'white'}), 
+                  html.H1(first_name ,style={'font-size':'10vmax','color':'white'}),
+                  html.H5("use the navigation links to access various features of the tool",style={'color':'white'})]
+                  ,style={"padding-left":"25px","padding-top":'10px'})
+    ],style={'width':'100vw'})    
