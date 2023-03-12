@@ -130,7 +130,7 @@ def select_unique_albums():
     conn.close()
     return res
 
-def select_liked_songs():
+def select_liked_songs(beg,end = 'all'):
     conn = postgres_init()
     cursor = conn.cursor()
     cursor.execute(open('sql/view_liked_songs.sql').read())
@@ -138,9 +138,11 @@ def select_liked_songs():
     res = cursor.fetchall()
     cursor.close()
     conn.close()
-    return res
+    if end == 'all':
+        return res[beg:]
+    return res[beg:end]
 
-def select_recent_songs():
+def select_recent_songs(beg,end = 'all'):
     conn = postgres_init()
     cursor = conn.cursor()
     cursor.execute(open('sql/view_recents.sql').read())
@@ -148,7 +150,9 @@ def select_recent_songs():
     res = cursor.fetchall()
     cursor.close()
     conn.close()
-    return res
+    if end == 'all':
+        return res[beg:]
+    return res[beg:end]
 #Analytics aid functions
 
 def get_years():

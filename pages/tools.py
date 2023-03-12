@@ -1,8 +1,6 @@
 import dash
-from dash import html,callback,Output,Input
+from dash import html
 import dash_bootstrap_components as dbc
-
-
 
 
 dash.register_page(__name__,path_template='/tools/<username>')
@@ -11,15 +9,12 @@ def layout(username = None):
 
     navbar = dbc.NavbarSimple(
     children=[
-        dbc.NavItem(dbc.NavLink("Liked Songs", href='#',id='LikedSongs')),
-        dbc.NavItem(dbc.NavLink("Recents", href="#",id="Recents")),
-        dbc.NavItem(dbc.NavLink("Analytics", href="#",id="Analytics")),
-        dbc.NavItem(dbc.NavLink("Back", href="#",id="Back"))
+        dbc.NavItem(dbc.NavLink("Liked Songs", href=f'http://localhost:8050/liked/{username}',id='LikedSongs')),
+        dbc.NavItem(dbc.NavLink("Recents", href=f'http://localhost:8050/recents/{username}',id="Recents",)),
+        dbc.NavItem(dbc.NavLink("Analytics", href=f'http://localhost:8050/analytics/{username}',id="Analytics"))
     ],
     brand="Spotify Analyzer",
-    brand_href="#",
-    #style={'margin-bottom': '50px','background-image':'url("https://i.pinimg.com/736x/5d/73/ea/5d73eaabb25e3805de1f8cdea7df4a42--tumblr-backgrounds-iphone-phone-wallpapers-iphone-wallaper-tumblr.jpg")','background-color':'#3b5998'},
-    id='NaviBar',
+    brand_href="http://localhost:8050/",
     className='box-form left'
     )
 

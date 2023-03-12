@@ -1,5 +1,4 @@
 from dash import dcc, callback
-import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash import html
 import dash
@@ -34,7 +33,7 @@ def layout():
                 html.Br(),
                 html.Br(),
 
-                html.Button("Login",id='username_submit_button')
+                html.Button("Login",id='username_submit_button'),
             ], className='right')
         ], className='box-form')
     ])
@@ -45,6 +44,8 @@ def check_date(timestamp):
 
 
 def fetch_data(username):
+
+    #print("Calling fetch data") 
 
     token = spotify.spotify_init(username)
 
@@ -75,10 +76,13 @@ def fetch_data(username):
     recent_songs_dict = list(recent_df.T.to_dict().values())
     postgres.add_liked_songs_dict(recent_songs_dict, 'recents')
 
+
+    master_songs_dict = list(set(songs_dict + recent_songs_dict))
+
     # Artists processed
     artist_ids_spotify = []
 
-    for i in songs_dict:
+    for i in master_songs_dict:
         artist_ids_spotify.append(i['artists'])
     artist_ids_spotify = list(set(artist_ids_spotify))
     artists = spotify.get_artists(token, artist_ids_spotify)
@@ -101,11 +105,10 @@ def fetch_data(username):
     # Albums processed
     album_ids_spotify = []
 
-    for i in songs_dict:
+    for i in master_songs_dict:
         album_ids_spotify.append(i['album'])
     album_ids_spotify = list(set(album_ids_spotify))
     albums = spotify.get_albums(token, album_ids_spotify)
-    # print(albums[0:2])
     postgres.create_album_table()
     album_ids_tuple = postgres.select_unique_albums()
     album_ids = []
@@ -119,7 +122,6 @@ def fetch_data(username):
 
     albums = new_albums.copy()
     albums = spotify.process_albums(albums)
-    # print(albums[0:2])
     postgres.add_albums_dict(albums)
 
 
@@ -135,3 +137,13 @@ def button_on_clicked(n_clicks, value):
     else:
         fetch_data(value)
         return '/tools/{}'.format(value)
+
+'''
+@callback(
+    Output('placeholder','children'),
+    [Input('interval-component','n_intervals')],
+    [State('username_input', 'value')]
+)
+def time_based_calc(n_intevrals,username):
+    fetch_data(username)
+'''
