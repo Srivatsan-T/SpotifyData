@@ -2,7 +2,7 @@
 
 # Codebase Overview
 
-**Total Modules:** 8
+**Total Modules:** 9
 
 This document provides a comprehensive overview of all modules in the codebase.
 
@@ -15,20 +15,32 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/index.py`  
 **UID:** `index`
 
-**Purpose:** Initializes and runs a Dash web application using Bootstrap styling and page routing.
+**Purpose:** Initializes and runs a Dash web application with Bootstrap styling and page routing.
 
 **Responsibilities:**
 - Creates a Dash app instance with Bootstrap theme and page support.
-- Defines the main layout to include the page container.
+- Defines the app layout to include the page container for multi-page navigation.
 - Starts the development server when executed as the main module.
+- Provides a single entry point for launching the web interface.
 
 **Key Components:**
 - `app (Dash instance)`
 - `app.layout (html.Div containing dash.page_container)`
 
-**Dependencies:** `dash`, `dash.Dash`, `dash.html`, `dash_bootstrap_components`
+**Dependencies:** `dash`, `dash_bootstrap_components`
 
-**Role in System:** Entry point that launches the web interface for the Spotify data application, coordinating page rendering and styling.
+**Role in System:** Serves as the main application bootstrap, orchestrating the Dash framework, theming, and page routing for the Spotify data dashboard.
+
+---
+
+### `new`
+
+**File:** `/app/cloned_repos/spotifydata/new.py`  
+**UID:** `new`
+
+**Purpose:** Placeholder module for testing continuous documentation.
+
+**Role in System:** Serves as a test or example module within the project, likely used during development or documentation generation.
 
 ---
 
@@ -37,9 +49,29 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/pages/analytics.py`  
 **UID:** `pages.analytics`
 
-**Purpose:** Error parsing summary response
+**Purpose:** Provides a dynamic analytics dashboard for a Spotify user, displaying yearly statistics such as most and least popular songs and top albums.
 
-**Role in System:** Unknown
+**Responsibilities:**
+- Renders the analytics page layout with navigation and year selection dropdown.
+- Handles user interactions via a Dash callback to fetch data from the PostgreSQL database.
+- Generates bar graphs for most and least popular songs and a table of top albums for the selected year.
+- Formats and returns the visual components for display.
+- Integrates with the Dash routing system to register the page path.
+- 
+
+**Key Components:**
+- `layout(username=None) – constructs the page layout with navbar, dropdown, and target div.`
+- `analytics_display(value) – Dash callback that queries postgres, builds graphs and tables, and returns them.`
+- `postgres.get_years() – retrieves available years for the dropdown.`
+- `postgres.get_albums_for_year(year) – fetches album data for a year.`
+- `postgres.get_popular_for_year(year,order) – retrieves song popularity data.`
+- `dcc.Graph – used to display bar charts.`
+- `dbc.Table.from_dataframe – renders album table.`
+- `dash.register_page – registers the page route.`
+
+**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.html`, `dash_bootstrap_components`, `pandas`, `postgres`
+
+**Role in System:** Serves as the analytics view within the Spotify Analyzer web application, enabling users to explore their listening data through interactive visualizations.
 
 ---
 
@@ -48,14 +80,14 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/pages/cred.py`  
 **UID:** `pages.cred`
 
-**Purpose:** This module implements the landing page of a Dash web application that authenticates a Spotify user, retrieves their music data, and stores it in a PostgreSQL database.
+**Purpose:** Provides the landing page for a Dash application that authenticates a Spotify user, fetches their music data, processes it, and stores it in a Postgres database.
 
 **Responsibilities:**
-- Creates the login page layout with input fields and a submit button.
-- Converts Spotify timestamp strings to Python datetime objects via `check_date`.
-- Fetches liked songs, recent songs, artists, and albums from Spotify, processes them, and inserts new records into PostgreSQL tables.
-- Defines a Dash callback that triggers data fetching on button click and redirects to the tools page.
-- Handles incremental updates by comparing timestamps with existing database entries.
+- Renders the login UI and handles user input via Dash components.
+- Converts Spotify timestamps to Python datetime objects.
+- Fetches liked songs, recent plays, artists, and albums from the Spotify API, processes the data, and persists it to Postgres tables.
+- Defines a callback that triggers data fetching on login and redirects to a tools page.
+- (Optional) Contains commented-out code for periodic data refresh via an interval component.
 - 
 
 **Key Components:**
@@ -64,9 +96,9 @@ This document provides a comprehensive overview of all modules in the codebase.
 - `fetch_data(username)`
 - `button_on_clicked(n_clicks,value)`
 
-**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.dependencies.State`, `dash.html`, `datetime.datetime`, `pandas`, `postgres`, `spotify`
+**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.dependencies.State`, `dash.html`, `datetime`, `pandas`, `spotify`, `postgres`
 
-**Role in System:** Serves as the entry point for user authentication and data ingestion, bridging the front‑end Dash interface with the back‑end Spotify API and PostgreSQL storage. It initiates the data pipeline that feeds subsequent analytical pages.
+**Role in System:** Acts as the entry point for user authentication and data ingestion, initializing the database with the user's Spotify data and routing to subsequent analytical tools.
 
 ---
 
@@ -75,26 +107,23 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/pages/liked_songs.py`  
 **UID:** `pages.liked_songs`
 
-**Purpose:** Provides a Dash web page that displays a paginated table of a user's liked Spotify songs.
+**Purpose:** Provides a Dash page that displays a paginated table of a user's liked songs from Spotify, including navigation and pagination controls.
 
 **Responsibilities:**
-- Registers the '/liked/<username>' route and constructs the page layout with navigation and pagination controls.
-- Retrieves liked songs from the PostgreSQL database via the postgres module.
-- Transforms the retrieved data into a pandas DataFrame and renders it as a Bootstrap table.
-- Handles pagination logic to fetch appropriate slices of data based on user interaction.
-- Integrates navigation links to other pages (Recents, Analytics, Back).
+- Registers the '/liked/<username>' page with Dash.
+- Builds the page layout with a navigation bar and pagination slider.
+- Fetches liked songs from the PostgreSQL database and paginates the results.
+- Renders the song data in a Bootstrap table via a callback.
+- Handles user interaction to update the displayed page of songs.
 
 **Key Components:**
-- `layout(username=None)`
-- `pages(active_page,max)`
-- `postgres.select_liked_songs`
-- `dbc.NavbarSimple`
-- `dcc.Slider`
-- `dbc.Table.from_dataframe`
+- `layout(username=None) – constructs the page layout with navbar, slider, and table placeholder.`
+- `pages(active_page,max) – Dash callback that queries liked songs, paginates, and returns a Bootstrap table.`
+- `Imports: dash, dash_bootstrap_components, pandas, postgres, math, dash.dependencies (Input, Output, State).`
 
-**Dependencies:** `postgres`, `dash`, `dash_bootstrap_components`, `pandas`, `math`
+**Dependencies:** `dash`, `dash_bootstrap_components`, `pandas`, `math`, `postgres`
 
-**Role in System:** Serves as the user-facing component of the Spotify Analyzer application, enabling users to view and navigate through their liked songs within the web interface.
+**Role in System:** Serves as the user-facing interface for viewing liked songs, integrating with the backend PostgreSQL data layer and the Dash front-end framework to provide interactive pagination and navigation within the Spotify Analyzer application.
 
 ---
 
@@ -103,25 +132,24 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/pages/recents.py`  
 **UID:** `pages.recents`
 
-**Purpose:** Provides a Dash web page that displays a paginated table of a user's most recent Spotify songs, including navigation links to other pages.
+**Purpose:** Provides a Dash web page that displays a paginated table of a user's most recent songs from a PostgreSQL database.
 
 **Responsibilities:**
-- Fetch recent song data from the PostgreSQL database
-- Calculate pagination parameters and render a slider for page selection
-- Generate a navigation bar linking to Liked Songs, Recents, Analytics, and Back pages
-- Render the song table using Dash Bootstrap components
-- Update the table contents dynamically based on slider input via a callback
+- Retrieves recent song data via postgres.select_recent_songs and calculates pagination details.
+- Renders a navigation bar linking to other user pages (Liked Songs, Recents, Analytics, Back).
+- Creates a layout with a slider for page selection and a placeholder for the song table.
+- Defines a callback that updates the table based on the selected page, converting the data to a Bootstrap table.
+- Handles page size logic and ensures the correct slice of data is fetched for each page.
 
 **Key Components:**
-- `layout(username=None)`
-- `pages(active_page,max)`
-- `navbar (dbc.NavbarSimple)`
-- `dcc.Slider (Pagination)`
-- `dbc.Table.from_dataframe`
+- `layout(username=None) – constructs the page layout with navbar, slider, and table placeholder.`
+- `pages(active_page,max) – callback that fetches and displays the appropriate slice of recent songs.`
+- `postgres.select_recent_songs – external function used to query recent songs.`
+- `dbc.Table.from_dataframe – renders the pandas DataFrame as a styled table.`
 
 **Dependencies:** `postgres`, `dash`, `dash_bootstrap_components`, `pandas`, `math`
 
-**Role in System:** Serves as the Recents view in the Spotify Analyzer web application, enabling users to browse their recent listening history with pagination and navigation to related analytics pages.
+**Role in System:** Serves as the user-facing component for viewing recent songs within the Spotify Analyzer Dash application, integrating data retrieval, pagination, and UI rendering.
 
 ---
 
@@ -133,17 +161,21 @@ This document provides a comprehensive overview of all modules in the codebase.
 **Purpose:** Provides a user‑specific tools page for the Spotify Analyzer web app, featuring navigation links to liked songs, recents, and analytics.
 
 **Responsibilities:**
-- Registers the page with Dash using a dynamic URL template.
-- Defines a layout function that builds a navbar and greeting header based on the supplied username.
-- Generates navigation links pointing to other app sections for the current user.
+- Registers the page with Dash using a username path template.
+- Creates a navigation bar with links to other tool pages.
+- Generates a personalized greeting using the supplied username.
+- Returns the complete layout as a Dash HTML Div.
+- Handles URL formatting for user navigation.
+- 
 
 **Key Components:**
-- `layout(username=None) function`
-- `NavbarSimple component with NavLinks`
+- `layout(username=None) function – builds the page layout.`
+- `navbar – a Dash Bootstrap Components NavbarSimple instance with NavLinks.`
+- `first_name extraction – parses the username for display.`
 
 **Dependencies:** `dash`, `dash.html`, `dash_bootstrap_components`
 
-**Role in System:** Serves as one of the main pages in the Dash application, enabling users to access different Spotify data features via a personalized interface.
+**Role in System:** Serves as one of the main pages in the Dash application, providing a central hub for users to access various Spotify data features.
 
 ---
 
@@ -152,13 +184,13 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/postgres.py`  
 **UID:** `postgres`
 
-**Purpose:** Provides a PostgreSQL data access layer for storing and retrieving Spotify data such as liked songs, recent songs, albums, and artists, and offers analytics queries.
+**Purpose:** Provides a data access layer for storing and retrieving Spotify-related data in a PostgreSQL database, including liked songs, recent songs, albums, and artists, and supports analytics queries.
 
 **Responsibilities:**
-- Establishes database connections via psycopg2
-- Creates and manages tables for liked songs, recent songs, albums, and artists
-- Inserts bulk data into tables using execute_values
-- Retrieves data for display and analytics (e.g., unique artists/albums, song lists, yearly statistics)
+- Initializes database connections and creates required tables
+- Inserts bulk data for songs, albums, and artists
+- Retrieves data slices for liked and recent songs
+- Provides analytics helpers such as year lists, album listings, and monthly popularity stats
 
 **Key Components:**
 - `postgres_init`
@@ -182,7 +214,7 @@ This document provides a comprehensive overview of all modules in the codebase.
 
 **Used By:** `pages.analytics`, `pages.analytics.analytics_display`, `pages.analytics.layout`, `pages.cred`, `pages.cred.fetch_data`, `pages.liked_songs`, `pages.liked_songs.layout`, `pages.liked_songs.pages`, `pages.recents`, `pages.recents.layout`, `pages.recents.pages`
 
-**Role in System:** Acts as the core data persistence layer, exposing CRUD and analytics functions to the UI and analytics pages, enabling data-driven features across the application.
+**Role in System:** Acts as the persistence layer for the application, enabling other modules (analytics, UI pages, credential fetchers) to interact with the PostgreSQL database without handling raw SQL or connection logic.
 
 ---
 
@@ -191,38 +223,28 @@ This document provides a comprehensive overview of all modules in the codebase.
 **File:** `/app/cloned_repos/spotifydata/spotify.py`  
 **UID:** `spotify`
 
-**Purpose:** Provides a data access layer for Spotify, handling authentication and retrieval of recent plays, liked tracks, albums, and artists, then normalizing the data into dictionary structures.
+**Purpose:** Provides authentication and data retrieval from the Spotify API, converting raw responses into structured dictionaries for use elsewhere in the application.
 
 **Responsibilities:**
-- Authenticate a user via Spotify OAuth and return an access token.
-- Fetch the user's most recent played tracks and return them as a list of items.
-- Retrieve all tracks the user has saved (liked) in batches.
-- Batch-fetch album details given a list of album IDs.
-- Batch-fetch artist details given a list of artist IDs.
-- Transform raw liked track data into a flat list of dictionaries with key metadata.
-- Transform raw album data into a flat list of dictionaries with key metadata.
-- Transform raw artist data into a flat list of dictionaries with key metadata.
+- Obtains OAuth tokens for a Spotify user via spotipy.
+- Fetches recent plays, liked tracks, albums, and artists using the Spotify API.
+- Transforms raw API responses into flat dictionaries suitable for downstream processing or storage.
 
 **Key Components:**
-- `spotify_init()`
-- `recent_songs()`
-- `get_liked_songs()`
-- `get_albums()`
-- `get_artists()`
-- `process_liked_songs()`
-- `process_albums()`
-- `process_artists()`
-- `username`
-- `client_id`
-- `client_secret`
-- `redirect_uri`
-- `scope`
+- `spotify_init(username)`
+- `recent_songs(token)`
+- `get_liked_songs(token)`
+- `get_albums(token,album_ids)`
+- `get_artists(token,artist_ids)`
+- `process_liked_songs(liked_songs)`
+- `process_albums(albums)`
+- `process_artists(artists)`
 
 **Dependencies:** `dotenv.load_dotenv`, `os`, `pandas`, `spotipy`
 
 **Used By:** `pages.cred`, `pages.cred.fetch_data`
 
-**Role in System:** Serves as the Spotify API client and data normalizer, supplying other application components (e.g., UI pages) with structured music data for display or further analysis.
+**Role in System:** Serves as the data access layer for Spotify-related information, enabling other modules (e.g., credential handling and data fetching pages) to obtain and normalize user listening data.
 
 ---
 
@@ -231,346 +253,6 @@ This document provides a comprehensive overview of all modules in the codebase.
 ---
 
 ## Module Documentation
-
-### spotify.py.md
-
-# `spotify.py` – Spotify Data Retrieval & Processing
-
-**File path:** `/app/cloned_repos/spotifydata/spotify.py`  
-**Module name:** `spotify`  
-**Purpose:**  
-This module is the single point of interaction with the Spotify Web API.  
-It authenticates a user, pulls raw data (liked songs, recent plays, albums, artists), and
-converts that data into a flat list of dictionaries that can be inserted into a PostgreSQL
-database by the `postgres` module.
-
----
-
-## 1. External Dependencies
-
-| Dependency | Why it exists | What functionality is used |
-|------------|---------------|-----------------------------|
-| `dotenv.load_dotenv` | Loads environment variables from a `.env` file. | `load_dotenv()` is called at import time to populate `os.getenv`. |
-| `os` | Access to environment variables. | `os.getenv("CLIENT_ID")`, `os.getenv("CLIENT_SECRET")`. |
-| `pandas` | Imported but not used directly in this module. | No direct usage; likely a leftover import. |
-| `spotipy` | Official Spotify Web API client. | All API calls (`spotipy.util.prompt_for_user_token`, `spotipy.Spotify`). |
-
-> **Note:** The module imports `pandas` but never references it. It can be removed without
-> affecting functionality.
-
----
-
-## 2. Module‑level Configuration
-
-```python
-load_dotenv()                     # Load .env file
-username = "Srivatsan Thiruvengadam"   # Hard‑coded default (unused)
-client_id = os.getenv("CLIENT_ID")      # Spotify client ID
-client_secret = os.getenv("CLIENT_SECRET")  # Spotify client secret
-redirect_uri = 'http://localhost:7777/callback'
-scope = 'user-read-recently-played user-library-read'
-```
-
-- **`client_id` / `client_secret`** are required for OAuth authentication.
-- **`redirect_uri`** must match the URI registered in the Spotify developer dashboard.
-- **`scope`** defines the permissions requested: reading recent plays and the user’s library.
-
----
-
-## 3. Public API
-
-| Function | Purpose | Key Steps | Return Value |
-|----------|---------|-----------|--------------|
-| `spotify_init(spotify_username)` | Authenticates a user and returns an OAuth token. | Calls `spotipy.util.prompt_for_user_token` with the configured scope and credentials. | `token` (string) |
-| `recent_songs(token)` | Retrieves the user’s most recent 50 plays. | `sp.current_user_recently_played(limit=50)`. Adds an `added_at` field equal to `played_at`. | List of raw item dicts (`user_recent['items']`). |
-| `get_liked_songs(token)` | Retrieves all songs the user has saved. | Paginated loop (`offset`, `limit=50`) until `next` is `None`. | List of raw item dicts. |
-| `get_albums(token, album_ids)` | Fetches album details for a list of album IDs. | Batches requests in groups of 20 (Spotify API limit). | List of album dicts. |
-| `get_artists(token, artist_ids)` | Fetches artist details for a list of artist IDs. | Batches requests in groups of 50. | List of artist dicts. |
-| `process_liked_songs(liked_songs)` | Normalises liked‑song data into a flat dictionary per artist. | For each song, creates a dict with fields: `song_id`, `song_name`, `added_at`, `album`, `popularity`, `preview_url`, `duration_ms`. Then iterates over each artist in the song, adding an `artists` key and appending a copy of the dict. | List of dicts ready for DB insertion. |
-| `process_albums(albums)` | Normalises album data into a flat dictionary per genre/artist. | For each album, creates a dict with `album_id`, `album_name`, `popularity`. Then for each genre and each artist, appends a copy of the dict with `genres` or `artists` set. | List of dicts ready for DB insertion. |
-| `process_artists(artists)` | Normalises artist data into a flat dictionary per genre. | For each artist, creates a dict with `artist_id`, `artist_name`, `popularity`, `followers`. Then for each genre, appends a copy of the dict with `genres` set. | List of dicts ready for DB insertion. |
-
-> **Important:**  
-> - `process_liked_songs` creates a separate entry for each artist in a song; this is intentional to preserve the many‑to‑many relationship.  
-> - `process_albums` and `process_artists` similarly duplicate rows for each genre or artist.
-
----
-
-## 4. How the Module Is Used
-
-The `spotify` module is imported by **`pages.cred`** (and its helper `fetch_data` function).  
-The typical flow in `pages.cred.fetch_data` is:
-
-```python
-token = spotify.spotify_init(username)          # OAuth token
-songs = spotify.get_liked_songs(token)          # Raw liked songs
-songs_dict = spotify.process_liked_songs(songs) # Normalised dicts
-# ... store in Postgres via postgres.add_liked_songs_dict
-
-recent = spotify.recent_songs(token)            # Raw recent plays
-recent_dict = spotify.process_liked_songs(recent)
-# ... store in Postgres via postgres.add_liked_songs_dict
-
-# Gather unique artist and album IDs from the combined song list
-artist_ids = list(set([s['artists'] for s in master_songs_dict]))
-artists = spotify.get_artists(token, artist_ids)
-artists_dict = spotify.process_artists(artists)
-postgres.add_artists_dict(artists_dict)
-
-album_ids = list(set([s['album'] for s in master_songs_dict]))
-albums = spotify.get_albums(token, album_ids)
-albums_dict = spotify.process_albums(albums)
-postgres.add_albums_dict(albums_dict)
-```
-
-Thus, `spotify.py` is the **data source** for the application.  
-All downstream modules (`pages.liked_songs`, `pages.recents`, `pages.analytics`, etc.) rely on the
-PostgreSQL tables populated by these functions.
-
----
-
-## 5. Dependencies & Relationships
-
-- **Depends on**: None (only external libraries).  
-- **Used by**:  
-  - `pages.cred` (module)  
-  - `pages.cred.fetch_data` (function)  
-
-No other modules in the codebase import or call functions from `spotify.py`.
-
----
-
-## 6. Suggested Improvements
-
-| Issue | Recommendation |
-|-------|----------------|
-| `pandas` is imported but unused | Remove the import to reduce noise. |
-| Global variables (`username`, `client_id`, etc.) are defined but not used | Either remove them or document their intended purpose. |
-| No docstrings for functions | Add concise docstrings explaining parameters, return values, and side‑effects. |
-| Hard‑coded `username` | Remove or make it optional; the function already accepts a username argument. |
-| Repeated code in `process_*` functions (copying dicts) | Consider refactoring to a helper that handles duplication. |
-
----
-
-## 7. Quick Reference
-
-```python
-# Authenticate
-token = spotify.spotify_init("my_spotify_username")
-
-# Get data
-liked = spotify.get_liked_songs(token)
-recent = spotify.recent_songs(token)
-albums = spotify.get_albums(token, album_ids)
-artists = spotify.get_artists(token, artist_ids)
-
-# Process for DB
-liked_dict = spotify.process_liked_songs(liked)
-recent_dict = spotify.process_liked_songs(recent)
-albums_dict = spotify.process_albums(albums)
-artists_dict = spotify.process_artists(artists)
-```
-
-These processed dictionaries are then passed to the `postgres` module for insertion into the
-database.
-
----
-
-**End of documentation for `spotify.py`.**
-
----
-
-### recents.py.md
-
-# `recents.py` – Recents Page
-
-**File path**  
-`/app/cloned_repos/spotifydata/pages/recents.py`
-
----
-
-## Overview
-
-`recents.py` implements the **Recents** page of the Spotify Analyzer web application.  
-It is a Dash page that displays a paginated table of the most recently played songs for a
-given user. The page is registered with the URL pattern `/recents/<username>`.
-
-The module relies on:
-
-| Dependency | Purpose |
-|------------|---------|
-| `postgres` | Fetches recent‑song data from the PostgreSQL database. |
-| `dash` & `dash_bootstrap_components` | Build the page layout and UI components. |
-| `pandas` | Convert raw database rows into a DataFrame for easy rendering. |
-| `math` | Compute the number of pagination pages. |
-
----
-
-## Page Registration
-
-```python
-dash.register_page(__name__, path_template='/recents/<username>')
-```
-
-* Registers this module as a Dash page.  
-* The `<username>` placeholder is passed to the `layout` function.
-
----
-
-## `layout(username=None)`
-
-### Purpose
-Creates the static part of the page: a navigation bar, a pagination slider, and an empty
-container that will be filled with the recent‑songs table.
-
-### Key Steps
-
-1. **Data Retrieval**  
-   ```python
-   recents = postgres.select_recent_songs(0)
-   ```
-   * Calls `postgres.select_recent_songs` to fetch all recent songs (starting at offset 0).  
-   * The `postgres` module is responsible for executing the SQL query that returns the
-     recent‑songs view.
-
-2. **Pagination Calculation**  
-   ```python
-   number_of_recent_songs = len(recents)
-   page_size = 50
-   number_of_pages = math.ceil(number_of_recent_songs / page_size)
-   ```
-   * Uses `math.ceil` to determine how many pages are needed when showing 50 songs per page.
-
-3. **Navigation Bar**  
-   ```python
-   navbar = dbc.NavbarSimple(
-       children=[
-           dbc.NavItem(dbc.NavLink("Liked Songs", href=f'http://localhost:8050/liked/{username}', id='LikedSongs')),
-           dbc.NavItem(dbc.NavLink("Recents", href=f'http://localhost:8050/recents/{username}', id="Recents")),
-           dbc.NavItem(dbc.NavLink("Analytics", href=f'http://localhost:8050/analytics/{username}', id="Analytics")),
-           dbc.NavItem(dbc.NavLink("Back", href=f'http://localhost:8050/tools/{username}', id="Back"))
-       ],
-       brand="Spotify Analyzer",
-       brand_href="http://localhost:8050/",
-       className='box-form left'
-   )
-   ```
-   * Provides quick navigation to other pages (`Liked Songs`, `Recents`, `Analytics`, `Back`).
-
-4. **Return Structure**  
-   ```python
-   return html.Div([
-       navbar,
-       html.Div([dcc.Slider(id='Pagination', min=1, max=number_of_pages,
-                            step=1, value=1,
-                            marks={i: str(i) for i in range(1, number_of_pages+1)})],
-                style={'margin':'0 40px'}),
-       html.Div(children=[], id='recents_table', style={'margin':'0 40px'})
-   ], style={})
-   ```
-   * The slider (`Pagination`) controls the current page.  
-   * The `recents_table` div will be populated by the callback below.
-
----
-
-## Callback `pages(active_page, max)`
-
-```python
-@callback(
-    Output('recents_table', 'children'),
-    [Input('Pagination', 'value')],
-    [State('Pagination', 'max')]
-)
-def pages(active_page, max):
-    ...
-```
-
-### Purpose
-Dynamically updates the table of recent songs whenever the user changes the pagination slider.
-
-### Logic
-
-1. **Column Definition**  
-   ```python
-   column_names = ['song_id', 'SONG', 'ALBUM', 'ARTISTS', 'POPULARITY', 'preview_url']
-   ```
-
-2. **Data Retrieval with Pagination**  
-   ```python
-   if active_page == max:
-       recent_songs = postgres.select_recent_songs(active_page*50-50)
-   else:
-       recent_songs = postgres.select_recent_songs(active_page*50-50, active_page*50)
-   ```
-   * Calls `postgres.select_recent_songs` with `beg` and optional `end` parameters to fetch
-     only the rows for the current page.
-
-3. **DataFrame Construction**  
-   ```python
-   df = pd.DataFrame(recent_songs, columns=column_names)
-   df = df.drop(['song_id', 'preview_url'], axis=1)
-   ```
-
-4. **Render Table**  
-   ```python
-   return dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True)
-   ```
-   * Uses `dash_bootstrap_components` to create a styled table from the DataFrame.
-
----
-
-## Dependencies Explained
-
-| Module | Why it is imported | What functionality is used |
-|--------|--------------------|----------------------------|
-| `postgres` | Provides database access functions (`select_recent_songs`). | `select_recent_songs` is called to fetch recent‑song records. |
-| `dash` | Core Dash framework. | `dash.register_page` registers the page. |
-| `dash_bootstrap_components` | Bootstrap‑styled components. | `NavbarSimple`, `NavItem`, `NavLink`, `Table`. |
-| `dash.dependencies` (`Input`, `Output`, `State`) | Defines callback inputs/outputs. | `@callback` decorator and its arguments. |
-| `dash` (`dcc`, `html`) | UI components. | `dcc.Slider`, `html.Div`, `html.H1`, etc. |
-| `pandas` | Data manipulation. | `pd.DataFrame` and `drop`. |
-| `math` | Mathematical utilities. | `math.ceil` for pagination calculation. |
-
----
-
-## Interaction Flow
-
-1. **User navigates** to `/recents/<username>`.  
-2. Dash calls `layout(username)` to render the page skeleton.  
-3. The slider (`Pagination`) is displayed with marks for each page.  
-4. When the slider value changes, the `pages` callback is triggered.  
-5. The callback fetches the appropriate slice of recent songs from the database, builds a
-   DataFrame, removes unnecessary columns, and renders a Bootstrap table inside
-   `recents_table`.  
-6. The user can navigate between pages using the slider; the table updates accordingly.
-
----
-
-## Notes
-
-* The module does **not** directly handle authentication or data fetching from Spotify;
-  that logic resides in `pages.cred` and the `spotify` module.
-* The `recents` page relies on the database schema defined in the SQL files referenced by
-  `postgres.select_recent_songs`.  
-* No other modules list `recents` as a dependency in the provided evidence, but the
-  `postgres` module lists `recents` as a consumer.
-
----
-
-### Summary
-
-`recents.py` is a self‑contained Dash page that:
-
-1. **Registers** itself under `/recents/<username>`.  
-2. **Builds** a navigation bar, pagination slider, and placeholder for a table.  
-3. **Fetches** recent‑song data from PostgreSQL via the `postgres` module.  
-4. **Displays** the data in a paginated, Bootstrap‑styled table using `pandas` and
-   `dash_bootstrap_components`.  
-
-This module is the primary entry point for viewing a user’s recently played songs within
-the Spotify Analyzer application.
-
----
 
 ### analytics.py.md
 
@@ -746,217 +428,257 @@ All dependencies are explicitly listed in the `external_dependencies` field of t
 
 ---
 
-### index.py.md
+### codebase_overview.md
 
-# `index.py` – Application Bootstrap
+# Codebase Overview
 
-**File path**: `/app/cloned_repos/spotifydata/index.py`
+**Total Modules:** 9
 
----
-
-## Overview
-
-`index.py` is the entry point for the Spotify Analyzer Dash application.  
-It creates the Dash app instance, configures the external stylesheet, and
-defines the top‑level layout that will host all page components.
-
-```python
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
-
-from dash import Dash, html
-import dash_bootstrap_components as dbc
-import dash
-
-app = Dash(__name__, external_stylesheets=[
-           dbc.themes.BOOTSTRAP], use_pages=True)
-
-app.layout = html.Div([dash.page_container])
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
-```
+This document provides a comprehensive overview of all modules in the codebase.
 
 ---
 
-## Dependencies
+## Module Summaries
 
-| Import | Why it exists | Functionality used |
-|--------|---------------|--------------------|
-| `from dash import Dash, html` | Provides the core Dash application class and HTML component factory. | `Dash` creates the app instance; `html` is used to build the root `Div`. |
-| `import dash_bootstrap_components as dbc` | Supplies Bootstrap themes and components for styling. | `dbc.themes.BOOTSTRAP` is passed as an external stylesheet. |
-| `import dash` | Needed for the `dash.page_container` placeholder. | `dash.page_container` is a special component that renders the current page registered via `dash.register_page`. |
+### `index`
 
-> **Note**: The evidence shows no explicit `depends_on` or `used_by` relationships for `index.py`.  
-> Therefore, any downstream modules that rely on the `app` instance are not captured in this data set.
+**File:** `/app/cloned_repos/spotifydata/index.py`  
+**UID:** `index`
 
----
+**Purpose:** Initializes and runs a Dash web application with Bootstrap styling and page routing.
 
-## Usage
+**Responsibilities:**
+- Creates a Dash app instance with Bootstrap theme and page support.
+- Defines the app layout to include the page container for multi-page navigation.
+- Starts the development server when executed as the main module.
+- Provides a single entry point for launching the web interface.
 
-### 1. Application Creation
+**Key Components:**
+- `app (Dash instance)`
+- `app.layout (html.Div containing dash.page_container)`
 
-```python
-app = Dash(
-    __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    use_pages=True
-)
-```
+**Dependencies:** `dash`, `dash_bootstrap_components`
 
-- **`__name__`**: Identifies the module name for Dash.
-- **`external_stylesheets`**: Loads the Bootstrap theme for consistent styling across all pages.
-- **`use_pages=True`**: Enables Dash’s multi‑page feature, allowing the app to automatically discover pages registered with `dash.register_page`.
-
-### 2. Root Layout
-
-```python
-app.layout = html.Div([dash.page_container])
-```
-
-- The root layout is a single `Div` that contains `dash.page_container`.  
-- `dash.page_container` is a placeholder that Dash replaces with the layout of the currently active page (e.g., `/tools/<username>`, `/liked/<username>`, etc.).
-
-### 3. Running the Server
-
-```python
-if __name__ == '__main__':
-    app.run_server(debug=True)
-```
-
-- When executed directly (`python index.py`), the Dash development server starts on `http://127.0.0.1:8050/`.  
-- `debug=True` enables hot‑reloading and detailed error messages during development.
+**Role in System:** Serves as the main application bootstrap, orchestrating the Dash framework, theming, and page routing for the Spotify data dashboard.
 
 ---
 
-## Interaction with Other Modules
+### `new`
 
-- **Page Modules** (`pages.*`): Each page module registers itself with `dash.register_page`.  
-  When a user navigates to a URL that matches a registered page, Dash automatically renders that page’s layout inside `dash.page_container`.  
-  The `index.py` file does not directly import or call these modules; it relies on Dash’s page discovery mechanism.
+**File:** `/app/cloned_repos/spotifydata/new.py`  
+**UID:** `new`
 
-- **Shared `app` Instance**:  
-  If any other module imports `index` and accesses `index.app`, it can add callbacks, modify the layout, or register additional components.  
-  However, the current evidence does not show any such imports.
+**Purpose:** Placeholder module for testing continuous documentation.
 
----
-
-## Summary
-
-- `index.py` bootstraps the Dash application with Bootstrap styling and multi‑page support.  
-- It defines a minimal root layout that delegates rendering to the page system.  
-- No explicit dependencies or downstream usage are recorded in the provided evidence, but the file serves as the central hub that ties together all page modules via Dash’s page container.
+**Role in System:** Serves as a test or example module within the project, likely used during development or documentation generation.
 
 ---
 
-### tools.py.md
+### `analytics`
 
-# `pages.tools` – Tool Page for the Spotify Analyzer
+**File:** `/app/cloned_repos/spotifydata/pages/analytics.py`  
+**UID:** `pages.analytics`
 
-**File path**  
-`/app/cloned_repos/spotifydata/pages/tools.py`
+**Purpose:** Provides a dynamic analytics dashboard for a Spotify user, displaying yearly statistics such as most and least popular songs and top albums.
 
----
+**Responsibilities:**
+- Renders the analytics page layout with navigation and year selection dropdown.
+- Handles user interactions via a Dash callback to fetch data from the PostgreSQL database.
+- Generates bar graphs for most and least popular songs and a table of top albums for the selected year.
+- Formats and returns the visual components for display.
+- Integrates with the Dash routing system to register the page path.
+- 
 
-## Overview
+**Key Components:**
+- `layout(username=None) – constructs the page layout with navbar, dropdown, and target div.`
+- `analytics_display(value) – Dash callback that queries postgres, builds graphs and tables, and returns them.`
+- `postgres.get_years() – retrieves available years for the dropdown.`
+- `postgres.get_albums_for_year(year) – fetches album data for a year.`
+- `postgres.get_popular_for_year(year,order) – retrieves song popularity data.`
+- `dcc.Graph – used to display bar charts.`
+- `dbc.Table.from_dataframe – renders album table.`
+- `dash.register_page – registers the page route.`
 
-`pages.tools` is a Dash page that provides a simple navigation bar and a greeting for a logged‑in user.  
-It is registered with Dash using a dynamic URL template (`/tools/<username>`), so the page can be accessed as:
+**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.html`, `dash_bootstrap_components`, `pandas`, `postgres`
 
-```
-http://localhost:8050/tools/<username>
-```
-
-The page is the landing spot after a user logs in and fetches their Spotify data.
-
----
-
-## Imports & External Dependencies
-
-| Import | Purpose | Why it exists |
-|--------|---------|---------------|
-| `dash` | Core Dash framework | Provides `dash.register_page` and the `callback` decorator. |
-| `dash.html` | HTML component factory | Used to create `<div>`, `<h1>`, `<h5>` elements. |
-| `dash_bootstrap_components` (aliased as `dbc`) | Bootstrap‑styled components | Supplies `NavbarSimple`, `NavItem`, and `NavLink` for a responsive navigation bar. |
-
-> **Note:** No other modules import `pages.tools`, and it is not referenced by any other part of the codebase (`used_by` is empty).
+**Role in System:** Serves as the analytics view within the Spotify Analyzer web application, enabling users to explore their listening data through interactive visualizations.
 
 ---
 
-## Page Registration
+### `cred`
 
-```python
-dash.register_page(__name__, path_template='/tools/<username>')
-```
+**File:** `/app/cloned_repos/spotifydata/pages/cred.py`  
+**UID:** `pages.cred`
 
-- **`__name__`** – Registers this module as a Dash page.
-- **`path_template`** – Enables a dynamic segment (`<username>`) in the URL, which is passed to the `layout` function.
+**Purpose:** Provides the landing page for a Dash application that authenticates a Spotify user, fetches their music data, processes it, and stores it in a Postgres database.
 
----
+**Responsibilities:**
+- Renders the login UI and handles user input via Dash components.
+- Converts Spotify timestamps to Python datetime objects.
+- Fetches liked songs, recent plays, artists, and albums from the Spotify API, processes the data, and persists it to Postgres tables.
+- Defines a callback that triggers data fetching on login and redirects to a tools page.
+- (Optional) Contains commented-out code for periodic data refresh via an interval component.
+- 
 
-## `layout` Function
+**Key Components:**
+- `layout()`
+- `check_date(timestamp)`
+- `fetch_data(username)`
+- `button_on_clicked(n_clicks,value)`
 
-```python
-def layout(username=None):
-    ...
-```
+**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.dependencies.State`, `dash.html`, `datetime`, `pandas`, `spotify`, `postgres`
 
-### Parameters
-
-- `username` (str, optional) – The Spotify username extracted from the URL.  
-  It defaults to `None` when the page is accessed without a username, but in practice the app always supplies it.
-
-### Workflow
-
-1. **Navigation Bar (`navbar`)**  
-   - Built with `dbc.NavbarSimple`.  
-   - Contains three navigation links:
-     - **Liked Songs** → `/liked/<username>`
-     - **Recents** → `/recents/<username>`
-     - **Analytics** → `/analytics/<username>`
-   - Uses `brand="Spotify Analyzer"` and a custom CSS class `box-form left`.
-
-2. **User Greeting**  
-   - `first_name` is extracted by splitting the `username` on `%20` (URL‑encoded space) and taking the first part.  
-   - Two large white headings display `"Hello"` and the extracted first name.  
-   - A smaller instruction heading tells the user to use the navigation links.
-
-3. **Return Value**  
-   - A top‑level `html.Div` containing the navbar and greeting.  
-   - The outer div is styled with `{'width': '100vw'}` to span the full viewport width.
-
-### Example Output
-
-```html
-<div style="width:100vw;">
-  <div class="navbar-simple box-form left">
-    <!-- Navigation links -->
-  </div>
-  <div style="padding-left:25px; padding-top:10px;">
-    <h1 style="font-size:10vmax;color:white;">Hello</h1>
-    <h1 style="font-size:10vmax;color:white;"><first_name></h1>
-    <h5 style="color:white;">use the navigation links to access various features of the tool</h5>
-  </div>
-</div>
-```
+**Role in System:** Acts as the entry point for user authentication and data ingestion, initializing the database with the user's Spotify data and routing to subsequent analytical tools.
 
 ---
 
-## Usage in the Application
+### `liked_songs`
 
-- **Entry Point** – After a user logs in via `pages.cred`, the callback `button_on_clicked` redirects to `/tools/<username>`.  
-- **Navigation** – The navbar links allow the user to jump to the Liked Songs, Recents, or Analytics pages, each of which also accepts the same `<username>` parameter.  
-- **No Further Dependencies** – The module does not import or call any functions from other modules; it only builds UI components.
+**File:** `/app/cloned_repos/spotifydata/pages/liked_songs.py`  
+**UID:** `pages.liked_songs`
+
+**Purpose:** Provides a Dash page that displays a paginated table of a user's liked songs from Spotify, including navigation and pagination controls.
+
+**Responsibilities:**
+- Registers the '/liked/<username>' page with Dash.
+- Builds the page layout with a navigation bar and pagination slider.
+- Fetches liked songs from the PostgreSQL database and paginates the results.
+- Renders the song data in a Bootstrap table via a callback.
+- Handles user interaction to update the displayed page of songs.
+
+**Key Components:**
+- `layout(username=None) – constructs the page layout with navbar, slider, and table placeholder.`
+- `pages(active_page,max) – Dash callback that queries liked songs, paginates, and returns a Bootstrap table.`
+- `Imports: dash, dash_bootstrap_components, pandas, postgres, math, dash.dependencies (Input, Output, State).`
+
+**Dependencies:** `dash`, `dash_bootstrap_components`, `pandas`, `math`, `postgres`
+
+**Role in System:** Serves as the user-facing interface for viewing liked songs, integrating with the backend PostgreSQL data layer and the Dash front-end framework to provide interactive pagination and navigation within the Spotify Analyzer application.
 
 ---
 
-## Summary
+### `recents`
 
-- **Purpose** – Provide a welcoming, navigable landing page for a logged‑in Spotify user.  
-- **Key Components** – Dash page registration, Bootstrap navbar, dynamic greeting.  
-- **Dependencies** – `dash`, `dash.html`, `dash_bootstrap_components`.  
-- **Integration** – Registered as `/tools/<username>` and used as the default landing page after login.  
-- **No downstream consumers** – The module is self‑contained and not referenced by any other part of the codebase.
+**File:** `/app/cloned_repos/spotifydata/pages/recents.py`  
+**UID:** `pages.recents`
+
+**Purpose:** Provides a Dash web page that displays a paginated table of a user's most recent songs from a PostgreSQL database.
+
+**Responsibilities:**
+- Retrieves recent song data via postgres.select_recent_songs and calculates pagination details.
+- Renders a navigation bar linking to other user pages (Liked Songs, Recents, Analytics, Back).
+- Creates a layout with a slider for page selection and a placeholder for the song table.
+- Defines a callback that updates the table based on the selected page, converting the data to a Bootstrap table.
+- Handles page size logic and ensures the correct slice of data is fetched for each page.
+
+**Key Components:**
+- `layout(username=None) – constructs the page layout with navbar, slider, and table placeholder.`
+- `pages(active_page,max) – callback that fetches and displays the appropriate slice of recent songs.`
+- `postgres.select_recent_songs – external function used to query recent songs.`
+- `dbc.Table.from_dataframe – renders the pandas DataFrame as a styled table.`
+
+**Dependencies:** `postgres`, `dash`, `dash_bootstrap_components`, `pandas`, `math`
+
+**Role in System:** Serves as the user-facing component for viewing recent songs within the Spotify Analyzer Dash application, integrating data retrieval, pagination, and UI rendering.
+
+---
+
+### `tools`
+
+**File:** `/app/cloned_repos/spotifydata/pages/tools.py`  
+**UID:** `pages.tools`
+
+**Purpose:** Provides a user‑specific tools page for the Spotify Analyzer web app, featuring navigation links to liked songs, recents, and analytics.
+
+**Responsibilities:**
+- Registers the page with Dash using a username path template.
+- Creates a navigation bar with links to other tool pages.
+- Generates a personalized greeting using the supplied username.
+- Returns the complete layout as a Dash HTML Div.
+- Handles URL formatting for user navigation.
+- 
+
+**Key Components:**
+- `layout(username=None) function – builds the page layout.`
+- `navbar – a Dash Bootstrap Components NavbarSimple instance with NavLinks.`
+- `first_name extraction – parses the username for display.`
+
+**Dependencies:** `dash`, `dash.html`, `dash_bootstrap_components`
+
+**Role in System:** Serves as one of the main pages in the Dash application, providing a central hub for users to access various Spotify data features.
+
+---
+
+### `postgres`
+
+**File:** `/app/cloned_repos/spotifydata/postgres.py`  
+**UID:** `postgres`
+
+**Purpose:** Provides a data access layer for storing and retrieving Spotify-related data in a PostgreSQL database, including liked songs, recent songs, albums, and artists, and supports analytics queries.
+
+**Responsibilities:**
+- Initializes database connections and creates required tables
+- Inserts bulk data for songs, albums, and artists
+- Retrieves data slices for liked and recent songs
+- Provides analytics helpers such as year lists, album listings, and monthly popularity stats
+
+**Key Components:**
+- `postgres_init`
+- `create_liked_songs_table`
+- `create_recent_songs_table`
+- `create_album_table`
+- `create_artist_table`
+- `select_unique_artists`
+- `check_liked_songs`
+- `add_liked_songs_dict`
+- `add_albums_dict`
+- `add_artists_dict`
+- `select_unique_albums`
+- `select_liked_songs`
+- `select_recent_songs`
+- `get_years`
+- `get_albums_for_year`
+- `get_popular_for_year`
+
+**Dependencies:** `psycopg2`, `psycopg2.extras.execute_values`
+
+**Used By:** `pages.analytics`, `pages.analytics.analytics_display`, `pages.analytics.layout`, `pages.cred`, `pages.cred.fetch_data`, `pages.liked_songs`, `pages.liked_songs.layout`, `pages.liked_songs.pages`, `pages.recents`, `pages.recents.layout`, `pages.recents.pages`
+
+**Role in System:** Acts as the persistence layer for the application, enabling other modules (analytics, UI pages, credential fetchers) to interact with the PostgreSQL database without handling raw SQL or connection logic.
+
+---
+
+### `spotify`
+
+**File:** `/app/cloned_repos/spotifydata/spotify.py`  
+**UID:** `spotify`
+
+**Purpose:** Provides authentication and data retrieval from the Spotify API, converting raw responses into structured dictionaries for use elsewhere in the application.
+
+**Responsibilities:**
+- Obtains OAuth tokens for a Spotify user via spotipy.
+- Fetches recent plays, liked tracks, albums, and artists using the Spotify API.
+- Transforms raw API responses into flat dictionaries suitable for downstream processing or storage.
+
+**Key Components:**
+- `spotify_init(username)`
+- `recent_songs(token)`
+- `get_liked_songs(token)`
+- `get_albums(token,album_ids)`
+- `get_artists(token,artist_ids)`
+- `process_liked_songs(liked_songs)`
+- `process_albums(albums)`
+- `process_artists(artists)`
+
+**Dependencies:** `dotenv.load_dotenv`, `os`, `pandas`, `spotipy`
+
+**Used By:** `pages.cred`, `pages.cred.fetch_data`
+
+**Role in System:** Serves as the data access layer for Spotify-related information, enabling other modules (e.g., credential handling and data fetching pages) to obtain and normalize user listening data.
+
+---
+
+
 
 ---
 
@@ -1159,99 +881,106 @@ This module is the gateway that connects the user to the rest of the Spotify Ana
 
 ---
 
-### postgres.py.md
+### index.py.md
 
-# `postgres.py`
+# `index.py` – Application Bootstrap
 
-**File path:** `/app/cloned_repos/spotifydata/postgres.py`
-
-The `postgres` module is the single source of truth for all interactions with the PostgreSQL database that backs the Spotify Analyzer web‑app.  
-It abstracts away connection handling, SQL file loading, and bulk inserts so that the rest of the codebase can focus on business logic.
+**File path**: `/app/cloned_repos/spotifydata/index.py`
 
 ---
 
-## External Dependencies
+## Overview
 
-| Dependency | Why it exists | Functionality used |
-|------------|---------------|--------------------|
-| `psycopg2` | Provides the PostgreSQL driver. | `psycopg2.connect()` to open a connection. |
-| `psycopg2.extras.execute_values` | Enables efficient bulk inserts. | `execute_values(cursor, query, values)` for `add_*_dict` functions. |
+`index.py` is the entry point for the Spotify Analyzer Dash application.  
+It creates the Dash app instance, configures the external stylesheet, and
+defines the top‑level layout that will host all page components.
 
----
+```python
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
 
-## Core Functions
+from dash import Dash, html
+import dash_bootstrap_components as dbc
+import dash
 
-| Function | Purpose | Parameters | Return Value | Side‑Effects |
-|----------|---------|------------|--------------|--------------|
-| `postgres_init(db='postgres', user='postgres', pw='admin', host='localhost', port='5432')` | Opens a new database connection. | Connection parameters (all optional). | `psycopg2.connection` | None |
-| `create_liked_songs_table()` | Creates the `liked_songs` table. | None | None | Executes SQL from `sql/create_liked_songs.sql`. |
-| `create_recent_songs_table()` | Creates the `recents` table. | None | None | Executes SQL from `sql/create_recent_songs.sql`. |
-| `create_album_table()` | Creates the `album` table and returns all rows. | None | `list[tuple]` | Executes SQL from `sql/create_album_table.sql` and `sql/select_all_albums.sql`. |
-| `create_artist_table()` | Creates the `artist` table. | None | None | Executes SQL from `sql/create_artist_table.sql`. |
-| `select_unique_artists()` | Returns all distinct artist IDs. | None | `list[tuple]` | Executes SQL from `sql/select_unique_artist_ids.sql`. |
-| `check_liked_songs(table)` | Checks the most recent `added_at` timestamp in a table. | `table` – name of the table (`'liked_songs'` or `'recents'`). | `(timestamp, bool)` – timestamp and a flag indicating if a row exists. | Executes `SELECT MAX(added_at)` on the given table. |
-| `add_liked_songs_dict(songs, table)` | Bulk‑inserts a list of song dictionaries into the specified table. | `songs` – list of dicts; `table` – target table name. | None | Uses `execute_values` to insert rows; commits transaction. |
-| `add_albums_dict(albums)` | Bulk‑inserts a list of album dictionaries into the `album` table. | `albums` – list of dicts. | None | Uses `execute_values`; commits. |
-| `add_artists_dict(artists)` | Bulk‑inserts a list of artist dictionaries into the `artist` table. | `artists` – list of dicts. | None | Uses `execute_values`; commits. |
-| `select_unique_albums()` | Returns all distinct album IDs. | None | `list[tuple]` | Executes SQL from `sql/select_unique_album_ids.sql`. |
-| `select_liked_songs(beg, end='all')` | Retrieves a slice of the `liked_songs` table. | `beg` – start index; `end` – end index or `'all'`. | `list[tuple]` | Executes SQL from `sql/view_liked_songs.sql`. |
-| `select_recent_songs(beg, end='all')` | Retrieves a slice of the `recents` table. | `beg` – start index; `end` – end index or `'all'`. | `list[tuple]` | Executes SQL from `sql/view_recents.sql`. |
-| `get_years()` | Returns all years present in the data. | None | `list[tuple]` | Executes SQL from `sql/get_years.sql`. |
-| `get_albums_for_year(year)` | Returns albums for a specific year. | `year` – integer year. | `list[tuple]` | Executes SQL from `sql/get_albums.sql` with `year` interpolated. |
-| `get_popular_for_year(year, flag)` | Returns popular songs for each month of a year. | `year` – integer; `flag` – `'asc'` or `'desc'` for ordering. | `list[tuple]` | Loops over months, executing SQL from `sql/get_popular.sql` with parameters. |
+app = Dash(__name__, external_stylesheets=[
+           dbc.themes.BOOTSTRAP], use_pages=True)
 
-> **Note**  
-> All SQL files are read with `open('sql/...').read()` relative to the project root.  
-> Every function commits the transaction and closes the cursor and connection to avoid leaks.
+app.layout = html.Div([dash.page_container])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+```
 
 ---
 
-## How the Module Is Used
+## Dependencies
 
-| Module | How it uses `postgres` | What it achieves |
-|--------|-----------------------|------------------|
-| `pages.cred` | *Creates tables*, *checks for new data*, *inserts* liked songs, recents, artists, and albums. | Persists fresh Spotify data and avoids duplicates. |
-| `pages.cred.fetch_data` | Same as above, but extracted into a helper function. | Allows the callback to trigger data fetching without duplicating logic. |
-| `pages.liked_songs` | Calls `select_liked_songs` to paginate and display liked songs. | Provides the UI for browsing liked songs. |
-| `pages.recents` | Calls `select_recent_songs` to paginate and display recent plays. | Provides the UI for browsing recent songs. |
-| `pages.analytics` | Calls `get_years`, `get_albums_for_year`, and `get_popular_for_year` to build charts. | Supplies data for analytics dashboards. |
-| `pages.analytics.analytics_display` | Same as above, but inside a callback. | Dynamically updates the analytics view when a year is selected. |
+| Import | Why it exists | Functionality used |
+|--------|---------------|--------------------|
+| `from dash import Dash, html` | Provides the core Dash application class and HTML component factory. | `Dash` creates the app instance; `html` is used to build the root `Div`. |
+| `import dash_bootstrap_components as dbc` | Supplies Bootstrap themes and components for styling. | `dbc.themes.BOOTSTRAP` is passed as an external stylesheet. |
+| `import dash` | Needed for the `dash.page_container` placeholder. | `dash.page_container` is a special component that renders the current page registered via `dash.register_page`. |
 
----
-
-## Typical Workflow
-
-1. **User logs in** → `pages.cred.fetch_data` is invoked.  
-2. **Tables are created** (if they don't exist) via `create_*_table` functions.  
-3. **Existing data is checked** with `check_liked_songs` to avoid re‑inserting older entries.  
-4. **New data is inserted** using `add_*_dict` functions.  
-5. **UI pages** (`liked_songs`, `recents`, `analytics`) query the database through `select_*` or `get_*` functions to render tables and charts.
+> **Note**: The evidence shows no explicit `depends_on` or `used_by` relationships for `index.py`.  
+> Therefore, any downstream modules that rely on the `app` instance are not captured in this data set.
 
 ---
 
-## Design Rationale
+## Usage
 
-- **Separation of concerns** – All database logic lives in one module, keeping the UI code clean.  
-- **Bulk inserts** – `execute_values` dramatically speeds up data ingestion compared to row‑by‑row inserts.  
-- **SQL file separation** – Keeps complex queries in dedicated `.sql` files, making them easier to maintain and test.  
-- **Pagination support** – `select_*_songs` accept slice parameters, enabling efficient paging in the UI.  
-- **Duplication guard** – `check_liked_songs` and `select_unique_*` functions prevent re‑processing the same data.
+### 1. Application Creation
+
+```python
+app = Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    use_pages=True
+)
+```
+
+- **`__name__`**: Identifies the module name for Dash.
+- **`external_stylesheets`**: Loads the Bootstrap theme for consistent styling across all pages.
+- **`use_pages=True`**: Enables Dash’s multi‑page feature, allowing the app to automatically discover pages registered with `dash.register_page`.
+
+### 2. Root Layout
+
+```python
+app.layout = html.Div([dash.page_container])
+```
+
+- The root layout is a single `Div` that contains `dash.page_container`.  
+- `dash.page_container` is a placeholder that Dash replaces with the layout of the currently active page (e.g., `/tools/<username>`, `/liked/<username>`, etc.).
+
+### 3. Running the Server
+
+```python
+if __name__ == '__main__':
+    app.run_server(debug=True)
+```
+
+- When executed directly (`python index.py`), the Dash development server starts on `http://127.0.0.1:8050/`.  
+- `debug=True` enables hot‑reloading and detailed error messages during development.
 
 ---
 
-## Things to Watch
+## Interaction with Other Modules
 
-- **File paths** – The module assumes the `sql/` directory is located relative to the project root. If the working directory changes, SQL file loading will fail.  
-- **Connection parameters** – Default credentials (`postgres`/`admin`) are hard‑coded; adjust `postgres_init` if you use a different database setup.  
-- **Error handling** – The current implementation does not catch database errors; consider adding try/except blocks for production use.  
-- **SQL injection** – The module escapes single quotes manually in `add_*_dict`; using parameterized queries would be safer.  
+- **Page Modules** (`pages.*`): Each page module registers itself with `dash.register_page`.  
+  When a user navigates to a URL that matches a registered page, Dash automatically renders that page’s layout inside `dash.page_container`.  
+  The `index.py` file does not directly import or call these modules; it relies on Dash’s page discovery mechanism.
+
+- **Shared `app` Instance**:  
+  If any other module imports `index` and accesses `index.app`, it can add callbacks, modify the layout, or register additional components.  
+  However, the current evidence does not show any such imports.
 
 ---
 
 ## Summary
 
-`postgres.py` is the backbone of the Spotify Analyzer’s data persistence layer.  
-It provides a clean API for creating tables, inserting bulk data, and querying for analytics, all while keeping the rest of the application focused on presentation and user interaction.
+- `index.py` bootstraps the Dash application with Bootstrap styling and multi‑page support.  
+- It defines a minimal root layout that delegates rendering to the page system.  
+- No explicit dependencies or downstream usage are recorded in the provided evidence, but the file serves as the central hub that ties together all page modules via Dash’s page container.
 
 ---
 
@@ -1440,235 +1169,593 @@ All interactions are driven by Dash callbacks, and the module relies on the `pos
 
 ---
 
-### codebase_overview.md
+### postgres.py.md
 
-# Codebase Overview
+# `postgres.py`
 
-**Total Modules:** 8
+**File path:** `/app/cloned_repos/spotifydata/postgres.py`
 
-This document provides a comprehensive overview of all modules in the codebase.
-
----
-
-## Module Summaries
-
-### `index`
-
-**File:** `/app/cloned_repos/spotifydata/index.py`  
-**UID:** `index`
-
-**Purpose:** Initializes and runs a Dash web application using Bootstrap styling and page routing.
-
-**Responsibilities:**
-- Creates a Dash app instance with Bootstrap theme and page support.
-- Defines the main layout to include the page container.
-- Starts the development server when executed as the main module.
-
-**Key Components:**
-- `app (Dash instance)`
-- `app.layout (html.Div containing dash.page_container)`
-
-**Dependencies:** `dash`, `dash.Dash`, `dash.html`, `dash_bootstrap_components`
-
-**Role in System:** Entry point that launches the web interface for the Spotify data application, coordinating page rendering and styling.
+The `postgres` module is the single source of truth for all interactions with the PostgreSQL database that backs the Spotify Analyzer web‑app.  
+It abstracts away connection handling, SQL file loading, and bulk inserts so that the rest of the codebase can focus on business logic.
 
 ---
 
-### `analytics`
+## External Dependencies
 
-**File:** `/app/cloned_repos/spotifydata/pages/analytics.py`  
-**UID:** `pages.analytics`
-
-**Purpose:** Error parsing summary response
-
-**Role in System:** Unknown
+| Dependency | Why it exists | Functionality used |
+|------------|---------------|--------------------|
+| `psycopg2` | Provides the PostgreSQL driver. | `psycopg2.connect()` to open a connection. |
+| `psycopg2.extras.execute_values` | Enables efficient bulk inserts. | `execute_values(cursor, query, values)` for `add_*_dict` functions. |
 
 ---
 
-### `cred`
+## Core Functions
 
-**File:** `/app/cloned_repos/spotifydata/pages/cred.py`  
-**UID:** `pages.cred`
+| Function | Purpose | Parameters | Return Value | Side‑Effects |
+|----------|---------|------------|--------------|--------------|
+| `postgres_init(db='postgres', user='postgres', pw='admin', host='localhost', port='5432')` | Opens a new database connection. | Connection parameters (all optional). | `psycopg2.connection` | None |
+| `create_liked_songs_table()` | Creates the `liked_songs` table. | None | None | Executes SQL from `sql/create_liked_songs.sql`. |
+| `create_recent_songs_table()` | Creates the `recents` table. | None | None | Executes SQL from `sql/create_recent_songs.sql`. |
+| `create_album_table()` | Creates the `album` table and returns all rows. | None | `list[tuple]` | Executes SQL from `sql/create_album_table.sql` and `sql/select_all_albums.sql`. |
+| `create_artist_table()` | Creates the `artist` table. | None | None | Executes SQL from `sql/create_artist_table.sql`. |
+| `select_unique_artists()` | Returns all distinct artist IDs. | None | `list[tuple]` | Executes SQL from `sql/select_unique_artist_ids.sql`. |
+| `check_liked_songs(table)` | Checks the most recent `added_at` timestamp in a table. | `table` – name of the table (`'liked_songs'` or `'recents'`). | `(timestamp, bool)` – timestamp and a flag indicating if a row exists. | Executes `SELECT MAX(added_at)` on the given table. |
+| `add_liked_songs_dict(songs, table)` | Bulk‑inserts a list of song dictionaries into the specified table. | `songs` – list of dicts; `table` – target table name. | None | Uses `execute_values` to insert rows; commits transaction. |
+| `add_albums_dict(albums)` | Bulk‑inserts a list of album dictionaries into the `album` table. | `albums` – list of dicts. | None | Uses `execute_values`; commits. |
+| `add_artists_dict(artists)` | Bulk‑inserts a list of artist dictionaries into the `artist` table. | `artists` – list of dicts. | None | Uses `execute_values`; commits. |
+| `select_unique_albums()` | Returns all distinct album IDs. | None | `list[tuple]` | Executes SQL from `sql/select_unique_album_ids.sql`. |
+| `select_liked_songs(beg, end='all')` | Retrieves a slice of the `liked_songs` table. | `beg` – start index; `end` – end index or `'all'`. | `list[tuple]` | Executes SQL from `sql/view_liked_songs.sql`. |
+| `select_recent_songs(beg, end='all')` | Retrieves a slice of the `recents` table. | `beg` – start index; `end` – end index or `'all'`. | `list[tuple]` | Executes SQL from `sql/view_recents.sql`. |
+| `get_years()` | Returns all years present in the data. | None | `list[tuple]` | Executes SQL from `sql/get_years.sql`. |
+| `get_albums_for_year(year)` | Returns albums for a specific year. | `year` – integer year. | `list[tuple]` | Executes SQL from `sql/get_albums.sql` with `year` interpolated. |
+| `get_popular_for_year(year, flag)` | Returns popular songs for each month of a year. | `year` – integer; `flag` – `'asc'` or `'desc'` for ordering. | `list[tuple]` | Loops over months, executing SQL from `sql/get_popular.sql` with parameters. |
 
-**Purpose:** This module implements the landing page of a Dash web application that authenticates a Spotify user, retrieves their music data, and stores it in a PostgreSQL database.
-
-**Responsibilities:**
-- Creates the login page layout with input fields and a submit button.
-- Converts Spotify timestamp strings to Python datetime objects via `check_date`.
-- Fetches liked songs, recent songs, artists, and albums from Spotify, processes them, and inserts new records into PostgreSQL tables.
-- Defines a Dash callback that triggers data fetching on button click and redirects to the tools page.
-- Handles incremental updates by comparing timestamps with existing database entries.
-- 
-
-**Key Components:**
-- `layout()`
-- `check_date(timestamp)`
-- `fetch_data(username)`
-- `button_on_clicked(n_clicks,value)`
-
-**Dependencies:** `dash`, `dash.callback`, `dash.dcc`, `dash.dependencies.Input`, `dash.dependencies.Output`, `dash.dependencies.State`, `dash.html`, `datetime.datetime`, `pandas`, `postgres`, `spotify`
-
-**Role in System:** Serves as the entry point for user authentication and data ingestion, bridging the front‑end Dash interface with the back‑end Spotify API and PostgreSQL storage. It initiates the data pipeline that feeds subsequent analytical pages.
-
----
-
-### `liked_songs`
-
-**File:** `/app/cloned_repos/spotifydata/pages/liked_songs.py`  
-**UID:** `pages.liked_songs`
-
-**Purpose:** Provides a Dash web page that displays a paginated table of a user's liked Spotify songs.
-
-**Responsibilities:**
-- Registers the '/liked/<username>' route and constructs the page layout with navigation and pagination controls.
-- Retrieves liked songs from the PostgreSQL database via the postgres module.
-- Transforms the retrieved data into a pandas DataFrame and renders it as a Bootstrap table.
-- Handles pagination logic to fetch appropriate slices of data based on user interaction.
-- Integrates navigation links to other pages (Recents, Analytics, Back).
-
-**Key Components:**
-- `layout(username=None)`
-- `pages(active_page,max)`
-- `postgres.select_liked_songs`
-- `dbc.NavbarSimple`
-- `dcc.Slider`
-- `dbc.Table.from_dataframe`
-
-**Dependencies:** `postgres`, `dash`, `dash_bootstrap_components`, `pandas`, `math`
-
-**Role in System:** Serves as the user-facing component of the Spotify Analyzer application, enabling users to view and navigate through their liked songs within the web interface.
+> **Note**  
+> All SQL files are read with `open('sql/...').read()` relative to the project root.  
+> Every function commits the transaction and closes the cursor and connection to avoid leaks.
 
 ---
 
-### `recents`
+## How the Module Is Used
 
-**File:** `/app/cloned_repos/spotifydata/pages/recents.py`  
-**UID:** `pages.recents`
-
-**Purpose:** Provides a Dash web page that displays a paginated table of a user's most recent Spotify songs, including navigation links to other pages.
-
-**Responsibilities:**
-- Fetch recent song data from the PostgreSQL database
-- Calculate pagination parameters and render a slider for page selection
-- Generate a navigation bar linking to Liked Songs, Recents, Analytics, and Back pages
-- Render the song table using Dash Bootstrap components
-- Update the table contents dynamically based on slider input via a callback
-
-**Key Components:**
-- `layout(username=None)`
-- `pages(active_page,max)`
-- `navbar (dbc.NavbarSimple)`
-- `dcc.Slider (Pagination)`
-- `dbc.Table.from_dataframe`
-
-**Dependencies:** `postgres`, `dash`, `dash_bootstrap_components`, `pandas`, `math`
-
-**Role in System:** Serves as the Recents view in the Spotify Analyzer web application, enabling users to browse their recent listening history with pagination and navigation to related analytics pages.
+| Module | How it uses `postgres` | What it achieves |
+|--------|-----------------------|------------------|
+| `pages.cred` | *Creates tables*, *checks for new data*, *inserts* liked songs, recents, artists, and albums. | Persists fresh Spotify data and avoids duplicates. |
+| `pages.cred.fetch_data` | Same as above, but extracted into a helper function. | Allows the callback to trigger data fetching without duplicating logic. |
+| `pages.liked_songs` | Calls `select_liked_songs` to paginate and display liked songs. | Provides the UI for browsing liked songs. |
+| `pages.recents` | Calls `select_recent_songs` to paginate and display recent plays. | Provides the UI for browsing recent songs. |
+| `pages.analytics` | Calls `get_years`, `get_albums_for_year`, and `get_popular_for_year` to build charts. | Supplies data for analytics dashboards. |
+| `pages.analytics.analytics_display` | Same as above, but inside a callback. | Dynamically updates the analytics view when a year is selected. |
 
 ---
 
-### `tools`
+## Typical Workflow
 
-**File:** `/app/cloned_repos/spotifydata/pages/tools.py`  
-**UID:** `pages.tools`
-
-**Purpose:** Provides a user‑specific tools page for the Spotify Analyzer web app, featuring navigation links to liked songs, recents, and analytics.
-
-**Responsibilities:**
-- Registers the page with Dash using a dynamic URL template.
-- Defines a layout function that builds a navbar and greeting header based on the supplied username.
-- Generates navigation links pointing to other app sections for the current user.
-
-**Key Components:**
-- `layout(username=None) function`
-- `NavbarSimple component with NavLinks`
-
-**Dependencies:** `dash`, `dash.html`, `dash_bootstrap_components`
-
-**Role in System:** Serves as one of the main pages in the Dash application, enabling users to access different Spotify data features via a personalized interface.
+1. **User logs in** → `pages.cred.fetch_data` is invoked.  
+2. **Tables are created** (if they don't exist) via `create_*_table` functions.  
+3. **Existing data is checked** with `check_liked_songs` to avoid re‑inserting older entries.  
+4. **New data is inserted** using `add_*_dict` functions.  
+5. **UI pages** (`liked_songs`, `recents`, `analytics`) query the database through `select_*` or `get_*` functions to render tables and charts.
 
 ---
 
-### `postgres`
+## Design Rationale
 
-**File:** `/app/cloned_repos/spotifydata/postgres.py`  
-**UID:** `postgres`
-
-**Purpose:** Provides a PostgreSQL data access layer for storing and retrieving Spotify data such as liked songs, recent songs, albums, and artists, and offers analytics queries.
-
-**Responsibilities:**
-- Establishes database connections via psycopg2
-- Creates and manages tables for liked songs, recent songs, albums, and artists
-- Inserts bulk data into tables using execute_values
-- Retrieves data for display and analytics (e.g., unique artists/albums, song lists, yearly statistics)
-
-**Key Components:**
-- `postgres_init`
-- `create_liked_songs_table`
-- `create_recent_songs_table`
-- `create_album_table`
-- `create_artist_table`
-- `select_unique_artists`
-- `check_liked_songs`
-- `add_liked_songs_dict`
-- `add_albums_dict`
-- `add_artists_dict`
-- `select_unique_albums`
-- `select_liked_songs`
-- `select_recent_songs`
-- `get_years`
-- `get_albums_for_year`
-- `get_popular_for_year`
-
-**Dependencies:** `psycopg2`, `psycopg2.extras.execute_values`
-
-**Used By:** `pages.analytics`, `pages.analytics.analytics_display`, `pages.analytics.layout`, `pages.cred`, `pages.cred.fetch_data`, `pages.liked_songs`, `pages.liked_songs.layout`, `pages.liked_songs.pages`, `pages.recents`, `pages.recents.layout`, `pages.recents.pages`
-
-**Role in System:** Acts as the core data persistence layer, exposing CRUD and analytics functions to the UI and analytics pages, enabling data-driven features across the application.
+- **Separation of concerns** – All database logic lives in one module, keeping the UI code clean.  
+- **Bulk inserts** – `execute_values` dramatically speeds up data ingestion compared to row‑by‑row inserts.  
+- **SQL file separation** – Keeps complex queries in dedicated `.sql` files, making them easier to maintain and test.  
+- **Pagination support** – `select_*_songs` accept slice parameters, enabling efficient paging in the UI.  
+- **Duplication guard** – `check_liked_songs` and `select_unique_*` functions prevent re‑processing the same data.
 
 ---
 
-### `spotify`
+## Things to Watch
 
-**File:** `/app/cloned_repos/spotifydata/spotify.py`  
-**UID:** `spotify`
-
-**Purpose:** Provides a data access layer for Spotify, handling authentication and retrieval of recent plays, liked tracks, albums, and artists, then normalizing the data into dictionary structures.
-
-**Responsibilities:**
-- Authenticate a user via Spotify OAuth and return an access token.
-- Fetch the user's most recent played tracks and return them as a list of items.
-- Retrieve all tracks the user has saved (liked) in batches.
-- Batch-fetch album details given a list of album IDs.
-- Batch-fetch artist details given a list of artist IDs.
-- Transform raw liked track data into a flat list of dictionaries with key metadata.
-- Transform raw album data into a flat list of dictionaries with key metadata.
-- Transform raw artist data into a flat list of dictionaries with key metadata.
-
-**Key Components:**
-- `spotify_init()`
-- `recent_songs()`
-- `get_liked_songs()`
-- `get_albums()`
-- `get_artists()`
-- `process_liked_songs()`
-- `process_albums()`
-- `process_artists()`
-- `username`
-- `client_id`
-- `client_secret`
-- `redirect_uri`
-- `scope`
-
-**Dependencies:** `dotenv.load_dotenv`, `os`, `pandas`, `spotipy`
-
-**Used By:** `pages.cred`, `pages.cred.fetch_data`
-
-**Role in System:** Serves as the Spotify API client and data normalizer, supplying other application components (e.g., UI pages) with structured music data for display or further analysis.
+- **File paths** – The module assumes the `sql/` directory is located relative to the project root. If the working directory changes, SQL file loading will fail.  
+- **Connection parameters** – Default credentials (`postgres`/`admin`) are hard‑coded; adjust `postgres_init` if you use a different database setup.  
+- **Error handling** – The current implementation does not catch database errors; consider adding try/except blocks for production use.  
+- **SQL injection** – The module escapes single quotes manually in `add_*_dict`; using parameterized queries would be safer.  
 
 ---
 
+## Summary
 
+`postgres.py` is the backbone of the Spotify Analyzer’s data persistence layer.  
+It provides a clean API for creating tables, inserting bulk data, and querying for analytics, all while keeping the rest of the application focused on presentation and user interaction.
+
+---
+
+### recents.py.md
+
+# `recents.py` – Recents Page
+
+**File path**  
+`/app/cloned_repos/spotifydata/pages/recents.py`
+
+---
+
+## Overview
+
+`recents.py` implements the **Recents** page of the Spotify Analyzer web application.  
+It is a Dash page that displays a paginated table of the most recently played songs for a
+given user. The page is registered with the URL pattern `/recents/<username>`.
+
+The module relies on:
+
+| Dependency | Purpose |
+|------------|---------|
+| `postgres` | Fetches recent‑song data from the PostgreSQL database. |
+| `dash` & `dash_bootstrap_components` | Build the page layout and UI components. |
+| `pandas` | Convert raw database rows into a DataFrame for easy rendering. |
+| `math` | Compute the number of pagination pages. |
+
+---
+
+## Page Registration
+
+```python
+dash.register_page(__name__, path_template='/recents/<username>')
+```
+
+* Registers this module as a Dash page.  
+* The `<username>` placeholder is passed to the `layout` function.
+
+---
+
+## `layout(username=None)`
+
+### Purpose
+Creates the static part of the page: a navigation bar, a pagination slider, and an empty
+container that will be filled with the recent‑songs table.
+
+### Key Steps
+
+1. **Data Retrieval**  
+   ```python
+   recents = postgres.select_recent_songs(0)
+   ```
+   * Calls `postgres.select_recent_songs` to fetch all recent songs (starting at offset 0).  
+   * The `postgres` module is responsible for executing the SQL query that returns the
+     recent‑songs view.
+
+2. **Pagination Calculation**  
+   ```python
+   number_of_recent_songs = len(recents)
+   page_size = 50
+   number_of_pages = math.ceil(number_of_recent_songs / page_size)
+   ```
+   * Uses `math.ceil` to determine how many pages are needed when showing 50 songs per page.
+
+3. **Navigation Bar**  
+   ```python
+   navbar = dbc.NavbarSimple(
+       children=[
+           dbc.NavItem(dbc.NavLink("Liked Songs", href=f'http://localhost:8050/liked/{username}', id='LikedSongs')),
+           dbc.NavItem(dbc.NavLink("Recents", href=f'http://localhost:8050/recents/{username}', id="Recents")),
+           dbc.NavItem(dbc.NavLink("Analytics", href=f'http://localhost:8050/analytics/{username}', id="Analytics")),
+           dbc.NavItem(dbc.NavLink("Back", href=f'http://localhost:8050/tools/{username}', id="Back"))
+       ],
+       brand="Spotify Analyzer",
+       brand_href="http://localhost:8050/",
+       className='box-form left'
+   )
+   ```
+   * Provides quick navigation to other pages (`Liked Songs`, `Recents`, `Analytics`, `Back`).
+
+4. **Return Structure**  
+   ```python
+   return html.Div([
+       navbar,
+       html.Div([dcc.Slider(id='Pagination', min=1, max=number_of_pages,
+                            step=1, value=1,
+                            marks={i: str(i) for i in range(1, number_of_pages+1)})],
+                style={'margin':'0 40px'}),
+       html.Div(children=[], id='recents_table', style={'margin':'0 40px'})
+   ], style={})
+   ```
+   * The slider (`Pagination`) controls the current page.  
+   * The `recents_table` div will be populated by the callback below.
+
+---
+
+## Callback `pages(active_page, max)`
+
+```python
+@callback(
+    Output('recents_table', 'children'),
+    [Input('Pagination', 'value')],
+    [State('Pagination', 'max')]
+)
+def pages(active_page, max):
+    ...
+```
+
+### Purpose
+Dynamically updates the table of recent songs whenever the user changes the pagination slider.
+
+### Logic
+
+1. **Column Definition**  
+   ```python
+   column_names = ['song_id', 'SONG', 'ALBUM', 'ARTISTS', 'POPULARITY', 'preview_url']
+   ```
+
+2. **Data Retrieval with Pagination**  
+   ```python
+   if active_page == max:
+       recent_songs = postgres.select_recent_songs(active_page*50-50)
+   else:
+       recent_songs = postgres.select_recent_songs(active_page*50-50, active_page*50)
+   ```
+   * Calls `postgres.select_recent_songs` with `beg` and optional `end` parameters to fetch
+     only the rows for the current page.
+
+3. **DataFrame Construction**  
+   ```python
+   df = pd.DataFrame(recent_songs, columns=column_names)
+   df = df.drop(['song_id', 'preview_url'], axis=1)
+   ```
+
+4. **Render Table**  
+   ```python
+   return dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True)
+   ```
+   * Uses `dash_bootstrap_components` to create a styled table from the DataFrame.
+
+---
+
+## Dependencies Explained
+
+| Module | Why it is imported | What functionality is used |
+|--------|--------------------|----------------------------|
+| `postgres` | Provides database access functions (`select_recent_songs`). | `select_recent_songs` is called to fetch recent‑song records. |
+| `dash` | Core Dash framework. | `dash.register_page` registers the page. |
+| `dash_bootstrap_components` | Bootstrap‑styled components. | `NavbarSimple`, `NavItem`, `NavLink`, `Table`. |
+| `dash.dependencies` (`Input`, `Output`, `State`) | Defines callback inputs/outputs. | `@callback` decorator and its arguments. |
+| `dash` (`dcc`, `html`) | UI components. | `dcc.Slider`, `html.Div`, `html.H1`, etc. |
+| `pandas` | Data manipulation. | `pd.DataFrame` and `drop`. |
+| `math` | Mathematical utilities. | `math.ceil` for pagination calculation. |
+
+---
+
+## Interaction Flow
+
+1. **User navigates** to `/recents/<username>`.  
+2. Dash calls `layout(username)` to render the page skeleton.  
+3. The slider (`Pagination`) is displayed with marks for each page.  
+4. When the slider value changes, the `pages` callback is triggered.  
+5. The callback fetches the appropriate slice of recent songs from the database, builds a
+   DataFrame, removes unnecessary columns, and renders a Bootstrap table inside
+   `recents_table`.  
+6. The user can navigate between pages using the slider; the table updates accordingly.
+
+---
+
+## Notes
+
+* The module does **not** directly handle authentication or data fetching from Spotify;
+  that logic resides in `pages.cred` and the `spotify` module.
+* The `recents` page relies on the database schema defined in the SQL files referenced by
+  `postgres.select_recent_songs`.  
+* No other modules list `recents` as a dependency in the provided evidence, but the
+  `postgres` module lists `recents` as a consumer.
+
+---
+
+### Summary
+
+`recents.py` is a self‑contained Dash page that:
+
+1. **Registers** itself under `/recents/<username>`.  
+2. **Builds** a navigation bar, pagination slider, and placeholder for a table.  
+3. **Fetches** recent‑song data from PostgreSQL via the `postgres` module.  
+4. **Displays** the data in a paginated, Bootstrap‑styled table using `pandas` and
+   `dash_bootstrap_components`.  
+
+This module is the primary entry point for viewing a user’s recently played songs within
+the Spotify Analyzer application.
+
+---
+
+### spotify.py.md
+
+# `spotify.py` – Spotify Data Retrieval & Processing
+
+**File path:** `/app/cloned_repos/spotifydata/spotify.py`  
+**Module name:** `spotify`  
+**Purpose:**  
+This module is the single point of interaction with the Spotify Web API.  
+It authenticates a user, pulls raw data (liked songs, recent plays, albums, artists), and
+converts that data into a flat list of dictionaries that can be inserted into a PostgreSQL
+database by the `postgres` module.
+
+---
+
+## 1. External Dependencies
+
+| Dependency | Why it exists | What functionality is used |
+|------------|---------------|-----------------------------|
+| `dotenv.load_dotenv` | Loads environment variables from a `.env` file. | `load_dotenv()` is called at import time to populate `os.getenv`. |
+| `os` | Access to environment variables. | `os.getenv("CLIENT_ID")`, `os.getenv("CLIENT_SECRET")`. |
+| `pandas` | Imported but not used directly in this module. | No direct usage; likely a leftover import. |
+| `spotipy` | Official Spotify Web API client. | All API calls (`spotipy.util.prompt_for_user_token`, `spotipy.Spotify`). |
+
+> **Note:** The module imports `pandas` but never references it. It can be removed without
+> affecting functionality.
+
+---
+
+## 2. Module‑level Configuration
+
+```python
+load_dotenv()                     # Load .env file
+username = "Srivatsan Thiruvengadam"   # Hard‑coded default (unused)
+client_id = os.getenv("CLIENT_ID")      # Spotify client ID
+client_secret = os.getenv("CLIENT_SECRET")  # Spotify client secret
+redirect_uri = 'http://localhost:7777/callback'
+scope = 'user-read-recently-played user-library-read'
+```
+
+- **`client_id` / `client_secret`** are required for OAuth authentication.
+- **`redirect_uri`** must match the URI registered in the Spotify developer dashboard.
+- **`scope`** defines the permissions requested: reading recent plays and the user’s library.
+
+---
+
+## 3. Public API
+
+| Function | Purpose | Key Steps | Return Value |
+|----------|---------|-----------|--------------|
+| `spotify_init(spotify_username)` | Authenticates a user and returns an OAuth token. | Calls `spotipy.util.prompt_for_user_token` with the configured scope and credentials. | `token` (string) |
+| `recent_songs(token)` | Retrieves the user’s most recent 50 plays. | `sp.current_user_recently_played(limit=50)`. Adds an `added_at` field equal to `played_at`. | List of raw item dicts (`user_recent['items']`). |
+| `get_liked_songs(token)` | Retrieves all songs the user has saved. | Paginated loop (`offset`, `limit=50`) until `next` is `None`. | List of raw item dicts. |
+| `get_albums(token, album_ids)` | Fetches album details for a list of album IDs. | Batches requests in groups of 20 (Spotify API limit). | List of album dicts. |
+| `get_artists(token, artist_ids)` | Fetches artist details for a list of artist IDs. | Batches requests in groups of 50. | List of artist dicts. |
+| `process_liked_songs(liked_songs)` | Normalises liked‑song data into a flat dictionary per artist. | For each song, creates a dict with fields: `song_id`, `song_name`, `added_at`, `album`, `popularity`, `preview_url`, `duration_ms`. Then iterates over each artist in the song, adding an `artists` key and appending a copy of the dict. | List of dicts ready for DB insertion. |
+| `process_albums(albums)` | Normalises album data into a flat dictionary per genre/artist. | For each album, creates a dict with `album_id`, `album_name`, `popularity`. Then for each genre and each artist, appends a copy of the dict with `genres` or `artists` set. | List of dicts ready for DB insertion. |
+| `process_artists(artists)` | Normalises artist data into a flat dictionary per genre. | For each artist, creates a dict with `artist_id`, `artist_name`, `popularity`, `followers`. Then for each genre, appends a copy of the dict with `genres` set. | List of dicts ready for DB insertion. |
+
+> **Important:**  
+> - `process_liked_songs` creates a separate entry for each artist in a song; this is intentional to preserve the many‑to‑many relationship.  
+> - `process_albums` and `process_artists` similarly duplicate rows for each genre or artist.
+
+---
+
+## 4. How the Module Is Used
+
+The `spotify` module is imported by **`pages.cred`** (and its helper `fetch_data` function).  
+The typical flow in `pages.cred.fetch_data` is:
+
+```python
+token = spotify.spotify_init(username)          # OAuth token
+songs = spotify.get_liked_songs(token)          # Raw liked songs
+songs_dict = spotify.process_liked_songs(songs) # Normalised dicts
+# ... store in Postgres via postgres.add_liked_songs_dict
+
+recent = spotify.recent_songs(token)            # Raw recent plays
+recent_dict = spotify.process_liked_songs(recent)
+# ... store in Postgres via postgres.add_liked_songs_dict
+
+# Gather unique artist and album IDs from the combined song list
+artist_ids = list(set([s['artists'] for s in master_songs_dict]))
+artists = spotify.get_artists(token, artist_ids)
+artists_dict = spotify.process_artists(artists)
+postgres.add_artists_dict(artists_dict)
+
+album_ids = list(set([s['album'] for s in master_songs_dict]))
+albums = spotify.get_albums(token, album_ids)
+albums_dict = spotify.process_albums(albums)
+postgres.add_albums_dict(albums_dict)
+```
+
+Thus, `spotify.py` is the **data source** for the application.  
+All downstream modules (`pages.liked_songs`, `pages.recents`, `pages.analytics`, etc.) rely on the
+PostgreSQL tables populated by these functions.
+
+---
+
+## 5. Dependencies & Relationships
+
+- **Depends on**: None (only external libraries).  
+- **Used by**:  
+  - `pages.cred` (module)  
+  - `pages.cred.fetch_data` (function)  
+
+No other modules in the codebase import or call functions from `spotify.py`.
+
+---
+
+## 6. Suggested Improvements
+
+| Issue | Recommendation |
+|-------|----------------|
+| `pandas` is imported but unused | Remove the import to reduce noise. |
+| Global variables (`username`, `client_id`, etc.) are defined but not used | Either remove them or document their intended purpose. |
+| No docstrings for functions | Add concise docstrings explaining parameters, return values, and side‑effects. |
+| Hard‑coded `username` | Remove or make it optional; the function already accepts a username argument. |
+| Repeated code in `process_*` functions (copying dicts) | Consider refactoring to a helper that handles duplication. |
+
+---
+
+## 7. Quick Reference
+
+```python
+# Authenticate
+token = spotify.spotify_init("my_spotify_username")
+
+# Get data
+liked = spotify.get_liked_songs(token)
+recent = spotify.recent_songs(token)
+albums = spotify.get_albums(token, album_ids)
+artists = spotify.get_artists(token, artist_ids)
+
+# Process for DB
+liked_dict = spotify.process_liked_songs(liked)
+recent_dict = spotify.process_liked_songs(recent)
+albums_dict = spotify.process_albums(albums)
+artists_dict = spotify.process_artists(artists)
+```
+
+These processed dictionaries are then passed to the `postgres` module for insertion into the
+database.
+
+---
+
+**End of documentation for `spotify.py`.**
+
+---
+
+### tools.py.md
+
+# `pages.tools` – Tool Page for the Spotify Analyzer
+
+**File path**  
+`/app/cloned_repos/spotifydata/pages/tools.py`
+
+---
+
+## Overview
+
+`pages.tools` is a Dash page that provides a simple navigation bar and a greeting for a logged‑in user.  
+It is registered with Dash using a dynamic URL template (`/tools/<username>`), so the page can be accessed as:
+
+```
+http://localhost:8050/tools/<username>
+```
+
+The page is the landing spot after a user logs in and fetches their Spotify data.
+
+---
+
+## Imports & External Dependencies
+
+| Import | Purpose | Why it exists |
+|--------|---------|---------------|
+| `dash` | Core Dash framework | Provides `dash.register_page` and the `callback` decorator. |
+| `dash.html` | HTML component factory | Used to create `<div>`, `<h1>`, `<h5>` elements. |
+| `dash_bootstrap_components` (aliased as `dbc`) | Bootstrap‑styled components | Supplies `NavbarSimple`, `NavItem`, and `NavLink` for a responsive navigation bar. |
+
+> **Note:** No other modules import `pages.tools`, and it is not referenced by any other part of the codebase (`used_by` is empty).
+
+---
+
+## Page Registration
+
+```python
+dash.register_page(__name__, path_template='/tools/<username>')
+```
+
+- **`__name__`** – Registers this module as a Dash page.
+- **`path_template`** – Enables a dynamic segment (`<username>`) in the URL, which is passed to the `layout` function.
+
+---
+
+## `layout` Function
+
+```python
+def layout(username=None):
+    ...
+```
+
+### Parameters
+
+- `username` (str, optional) – The Spotify username extracted from the URL.  
+  It defaults to `None` when the page is accessed without a username, but in practice the app always supplies it.
+
+### Workflow
+
+1. **Navigation Bar (`navbar`)**  
+   - Built with `dbc.NavbarSimple`.  
+   - Contains three navigation links:
+     - **Liked Songs** → `/liked/<username>`
+     - **Recents** → `/recents/<username>`
+     - **Analytics** → `/analytics/<username>`
+   - Uses `brand="Spotify Analyzer"` and a custom CSS class `box-form left`.
+
+2. **User Greeting**  
+   - `first_name` is extracted by splitting the `username` on `%20` (URL‑encoded space) and taking the first part.  
+   - Two large white headings display `"Hello"` and the extracted first name.  
+   - A smaller instruction heading tells the user to use the navigation links.
+
+3. **Return Value**  
+   - A top‑level `html.Div` containing the navbar and greeting.  
+   - The outer div is styled with `{'width': '100vw'}` to span the full viewport width.
+
+### Example Output
+
+```html
+<div style="width:100vw;">
+  <div class="navbar-simple box-form left">
+    <!-- Navigation links -->
+  </div>
+  <div style="padding-left:25px; padding-top:10px;">
+    <h1 style="font-size:10vmax;color:white;">Hello</h1>
+    <h1 style="font-size:10vmax;color:white;"><first_name></h1>
+    <h5 style="color:white;">use the navigation links to access various features of the tool</h5>
+  </div>
+</div>
+```
+
+---
+
+## Usage in the Application
+
+- **Entry Point** – After a user logs in via `pages.cred`, the callback `button_on_clicked` redirects to `/tools/<username>`.  
+- **Navigation** – The navbar links allow the user to jump to the Liked Songs, Recents, or Analytics pages, each of which also accepts the same `<username>` parameter.  
+- **No Further Dependencies** – The module does not import or call any functions from other modules; it only builds UI components.
+
+---
+
+## Summary
+
+- **Purpose** – Provide a welcoming, navigable landing page for a logged‑in Spotify user.  
+- **Key Components** – Dash page registration, Bootstrap navbar, dynamic greeting.  
+- **Dependencies** – `dash`, `dash.html`, `dash_bootstrap_components`.  
+- **Integration** – Registered as `/tools/<username>` and used as the default landing page after login.  
+- **No downstream consumers** – The module is self‑contained and not referenced by any other part of the codebase.
+
+---
+
+### new.py.md
+
+# `new.py`
+
+**File path:** `/app/cloned_repos/spotifydata/new.py`
+
+---
+
+## Overview
+
+`new.py` is a placeholder module that currently contains only a single comment:
+
+```python
+#New file to test out continuous documentation
+```
+
+It does not expose any functions, classes, or variables, and it has no imports or external dependencies. As such, it does not participate in the current application logic.
+
+---
+
+## Dependencies
+
+- **None** – The module does not import or rely on any other modules or external libraries.
+
+---
+
+## Usage
+
+Because the module contains no executable code, it is not intended to be used directly. It may serve as a template or a starting point for future development.
+
+---
+
+## Documentation Status
+
+- **Docstring:** None
+- **Functions / Classes:** None
+- **External Dependencies:** None
+- **Used By:** None
+
+If you plan to add functionality to this file, consider adding a proper module‑level docstring and any necessary imports or definitions.
 
 ---
 
